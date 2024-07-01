@@ -126,6 +126,6 @@ export default {
 }
 
 .push-right {
-  transform: translateX(20%);
+  transform: translateX(15%);
 }
 </style>

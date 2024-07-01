@@ -2,7 +2,7 @@
 export default {
   methods: {
     openNav() {
-      this.$refs.sideNav.style.width = '20%'
+      this.$refs.sideNav.style.width = '15%'
       this.$refs.sideNav.style.marginLeft = '10%'
     },
     closeNav() {
@@ -30,10 +30,10 @@ export default {
   z-index: 0;
   top: 0;
   left: -10%;
-  background-color: lightgray;
+  background-color: rgba(211, 211, 211, 0.6);
   overflow-x: hidden;
   transition: 0.5s;
-  padding-top: 10%;
+  padding-top: 5%;
   border-radius: 0 0 50px 0;
   border: thin solid dimgray;
 }
