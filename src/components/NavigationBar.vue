@@ -1,19 +1,39 @@
-<script setup>
+<script>
 import NavigationBarIcon from '@/components/icons/NavigationBarIcon.vue'
+import OffCanvasNavBar from '@/components/OffCanvasNavBar.vue'
+export default {
+  emits: ['trigger-off-canvas'],
+  components: {
+    OffCanvasNavBar,
+    NavigationBarIcon
+  },
+  data() {
+    return {
+      isClicked: false
+    }
+  },
+  methods: {
+    triggerClickNavBtn() {
+      this.isClicked = !this.isClicked
+      this.$emit("trigger-off-canvas", this.isClicked)
+    }
+
+  }
+}
 </script>
 
 <template>
   <div class="navbar">
     <div style="width: 3px"></div>
-    <div class="navbar-svg list-toggle">
-      <NavigationBarIcon style="width: 40px; height: 40px"/>
+    <div class="navbar-svg list-toggle" @click="triggerClickNavBtn">
+      <NavigationBarIcon style="width: 40px; height: 40px" />
     </div>
     <div style="width: 12px"></div>
     <div class="navbar-block">
       成功大學 台灣文學系 校正網站
     </div>
   </div>
-
+  <OffCanvasNavBar/>
 </template>
 
 <style scoped>

@@ -1,9 +1,18 @@
-<script setup>
-
+<script>
+export default {
+  methods: {
+    navOpen() {
+      this.$refs.filterWindowRoot.classList.toggle('push-right')
+    },
+    navClose() {
+      this.$refs.filterWindowRoot.classList.toggle('push-right')
+    }
+  }
+}
 </script>
 
 <template>
-  <div class="window-block flex-col">
+  <div class="window-block flex-col" ref="filterWindowRoot">
     <div class="col input-block">
       <div class="filter-title">學校名稱</div>
       <select class="select-block padding-start">
@@ -43,6 +52,7 @@
 }
 
 .window-block {
+  transition: 0.5s;
   width: 70vw;
   height: 50vh;
   display: block;
@@ -115,4 +125,7 @@
   cursor: pointer;
 }
 
+.push-right {
+  transform: translateX(20%);
+}
 </style>
