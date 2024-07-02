@@ -60,6 +60,8 @@ export default {
   align-self: center;
   border-radius: 20px;
   border: solid 10px;
+  min-width: 400px;
+  min-height: 300px;
 }
 
 .select-block {
@@ -125,7 +127,4 @@ export default {
   cursor: pointer;
 }
 
-.push-right {
-  transform: translateX(20%);
-}
 </style>

@@ -35,3 +35,7 @@ a,
     background-color: white;
   }
 }
+
+.push-right {
+  transform: translateX(20%);
+}

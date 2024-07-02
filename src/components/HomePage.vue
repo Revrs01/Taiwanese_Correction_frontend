@@ -2,21 +2,25 @@
 import NavigationBar from '@/components/NavigationBar.vue'
 import FilterWindow from '@/components/FilterWindow.vue'
 import OffCanvasNavBar from '@/components/OffCanvasNavBar.vue'
+import StudentTable from '@/components/studentTable.vue'
 
 export default {
   components: {
     NavigationBar,
     FilterWindow,
-    OffCanvasNavBar
+    OffCanvasNavBar,
+    StudentTable
   },
   methods: {
     openCloseOffCanvas(status) {
       if (status) {
         this.$refs.offCanvas.openNav()
         this.$refs.filterWindow.navOpen()
+        this.$refs.studentTable.navOpen()
       } else {
         this.$refs.offCanvas.closeNav()
         this.$refs.filterWindow.navClose()
+        this.$refs.studentTable.navClose()
       }
     }
   }
@@ -31,6 +35,7 @@ export default {
 
     <OffCanvasNavBar ref="offCanvas" />
     <FilterWindow ref="filterWindow" />
+    <StudentTable ref="studentTable" />
   </main>
 
 </template>
