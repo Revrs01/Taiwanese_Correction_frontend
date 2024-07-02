@@ -1,9 +1,9 @@
 <template>
   <tbody>
   <tr>
-    <th scope="row" class="th-block">搭拉崩吧</th>
-    <th scope="row" class="th-block">6年5班 20號</th>
-    <th scope="row" class="th-block">女</th>
+    <th scope="row" class="th-block">{{ studentName }}</th>
+    <th scope="row" class="th-block">{{ classInfo }}</th>
+    <th scope="row" class="th-block">{{ gender }}</th>
     <th class="th-block">
       校正中
     </th>
@@ -22,7 +22,7 @@
     </td>
     <th scope="row">
       <div class="d-flex">
-        <button class="btn" style="color: white; background-color: orange; width: 100%;">進入校正
+        <button class="btn" style="color: white; background-color: orange; width: 100%;" @click="startCorrection">進入校正
         </button>
       </div>
     </th>
@@ -33,12 +33,27 @@
 <script>
 export default {
   name: 'StudentBody',
+  props: {
+    studentName: {
+      type: String,
+      required: true
+    },
+    classInfo: {
+      type: String,
+      required: true
+    },
+    gender: {
+      type: String,
+      required: true
+    },
+  },
   data() {
-    return {
-    }
+    return {}
   },
   methods: {
-
+    startCorrection() {
+      this.$emit('keep-only-me')
+    }
   }
 }
 </script>
@@ -99,7 +114,7 @@ table {
 }
 
 .table tbody + tbody {
-  border-top: 2px solid #e9ecef;
+  border-top: 5px solid rgba(255, 255, 255, 0);
 }
 
 .table .thead-dark th {
