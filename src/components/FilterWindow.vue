@@ -156,5 +156,4 @@ export default {
   background-color: seagreen;
   cursor: pointer;
 }
-
 </style>
