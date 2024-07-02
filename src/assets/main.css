@@ -33,5 +33,14 @@ a,
     /*padding: 0 2rem;*/
     height: 100vh;
     background-color: white;
+    overflow-y: scroll;
   }
+}
+
+.push-right {
+  transform: translateX(20%);
+}
+
+.pull-up {
+  transform: translateY(-60vh);
 }
