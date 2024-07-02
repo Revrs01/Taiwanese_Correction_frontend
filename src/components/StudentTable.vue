@@ -1,11 +1,14 @@
 <script>
 import StudentBody from '@/components/StudentBody.vue'
+import axios from 'axios'
 
 export default {
   components: { StudentBody },
   data() {
     return {
-      isVisible: false
+      isVisible: false,
+      studentInformation: [],
+      studentInformationTemp: []
     }
   },
   methods: {
@@ -17,6 +20,23 @@ export default {
     },
     toggleVisibility() {
       this.isVisible = !this.isVisible
+    },
+    getStudentInformation() {
+      axios.post('http://localhost:31109/fetch_students', {
+
+        startIndex: 0
+      })
+        .then(response => {
+          // console.log(response.data)
+          this.studentInformation = response.data
+          console.log(this.studentInformation)
+        })
+
+    },
+    handleKeepOnlyMe(index) {
+      // this.visibleStudentIndex = index;
+      this.studentInformationTemp = this.studentInformation
+      this.studentInformation = [this.studentInformationTemp[index]]
     }
   }
 }
@@ -39,7 +59,15 @@ export default {
           <th scope="col" style="font-size: 18px;">校正按鈕</th>
         </tr>
         </thead>
-        <StudentBody />
+        <StudentBody
+
+          v-for="(information, index) in this.studentInformation"
+          :key="index"
+          :student-name="information['studentName']"
+          :class-info="`${information['grade']}年 ${information['studentClass']}班 ${information['seatNumber']}號`"
+          :gender="`${information['gender'] === '1' ? '男' : '女'}`"
+          @keep-only-me="handleKeepOnlyMe(index)"
+        />
 
       </table>
     </div>
@@ -108,17 +136,14 @@ table {
   /*padding: 1rem;*/
   vertical-align: top;
   /*border-top: 1px solid #e9ecef;*/
-  border-radius: 20px;
+  border-radius: 10px 30px 10px 30px;
   min-width: max-content;
 }
 
 .table thead th {
   vertical-align: bottom;
-  /*border-bottom: 2px solid #e9ecef;*/
-}
+  /*border-bottom: 5px solid rgba(255, 255, 255, 0);*/
 
-.table tbody + tbody {
-  border-top: 2px solid #e9ecef;
 }
 
 .table .table {

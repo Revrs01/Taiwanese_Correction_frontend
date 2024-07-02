@@ -37,6 +37,7 @@ export default {
     },
     showStudentTable() {
       this.$refs.studentTable.toggleVisibility()
+      this.$refs.studentTable.getStudentInformation()
     },
     test() {
       // this.$refs.filterWindow.$data.isVisible = true

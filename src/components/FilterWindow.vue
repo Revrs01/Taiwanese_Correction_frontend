@@ -14,7 +14,6 @@ export default {
     },
     toggleVisibility() {
       this.isVisible = !this.isVisible
-
     }
   }
 }
