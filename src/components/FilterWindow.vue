@@ -1,50 +1,80 @@
 <script>
 export default {
+  data() {
+    return {
+      isVisible: true
+    }
+  },
   methods: {
     navOpen() {
       this.$refs.filterWindowRoot.classList.toggle('push-right')
     },
     navClose() {
       this.$refs.filterWindowRoot.classList.toggle('push-right')
+    },
+    toggleVisibility() {
+      this.isVisible = !this.isVisible
+
     }
   }
 }
 </script>
 
 <template>
-  <div class="window-block flex-col" ref="filterWindowRoot">
-    <div class="col input-block">
-      <div class="filter-title">學校名稱</div>
-      <select class="select-block padding-start">
-        <option value="" disabled selected>選擇學校</option>
-        <option>OPTION 1</option>
-      </select>
-    </div>
-    <div class="col input-block" style="padding: 1px 1px 0 1px">
-      <div class="row padding-mid-lane">
-        <div class="filter-title align-start input-block">年級</div>
-        <div class="filter-title align-mid input-block">班級</div>
+  <transition name="drag-up" @after-leave="() => this.$emit('filtered')">
+    <div v-if="isVisible" class="window-block flex-col" ref="filterWindowRoot">
+      <div class="col input-block">
+        <div class="filter-title">學校名稱</div>
+        <select class="select-block padding-start">
+          <option value="" disabled selected>選擇學校</option>
+          <option>OPTION 1</option>
+        </select>
       </div>
+      <div class="col input-block" style="padding: 1px 1px 0 1px">
+        <div class="row padding-mid-lane">
+          <div class="filter-title align-start input-block">年級</div>
+          <div class="filter-title align-mid input-block">班級</div>
+        </div>
 
+        <div class="row">
+          <select class="select-block shorten-width align-start padding-start">
+            <option value="" disabled selected>選擇年級</option>
+            <option>OPTION 1</option>
+          </select>
+
+          <select class="select-block shorten-width padding-start">
+            <option value="" disabled selected>選擇班級</option>
+            <option>OPTION 1</option>
+          </select>
+        </div>
+      </div>
       <div class="row">
-        <select class="select-block shorten-width align-start padding-start">
-          <option value="" disabled selected>選擇年級</option>
-          <option>OPTION 1</option>
-        </select>
-
-        <select class="select-block shorten-width padding-start">
-          <option value="" disabled selected>選擇班級</option>
-          <option>OPTION 1</option>
-        </select>
+        <button type="button" class="select-block shorten-button-size button-color" @click="toggleVisibility">送出篩選
+        </button>
       </div>
     </div>
-    <div class="row">
-      <button type="button" class="select-block shorten-button-size button-color">送出篩選</button>
-    </div>
-  </div>
+  </transition>
 </template>
 
 <style scoped>
+.drag-up-enter-active {
+  transition: transform 0.6s, opacity 0.3s;
+}
+
+.drag-up-leave-active {
+  transition: transform 0.6s, opacity 0.3s;
+}
+
+.drag-up-enter-from, .drag-up-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.drag-up-leave {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 .flex-col {
   display: flex;
   flex-direction: column;

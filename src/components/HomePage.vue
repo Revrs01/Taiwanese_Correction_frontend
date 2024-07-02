@@ -2,10 +2,12 @@
 import NavigationBar from '@/components/NavigationBar.vue'
 import FilterWindow from '@/components/FilterWindow.vue'
 import OffCanvasNavBar from '@/components/OffCanvasNavBar.vue'
-import StudentTable from '@/components/studentTable.vue'
+import StudentTable from '@/components/StudentTable.vue'
+// import CorrectionTable from '@/components/CorrectionTable.vue'
 
 export default {
   components: {
+    // CorrectionTable,
     NavigationBar,
     FilterWindow,
     OffCanvasNavBar,
@@ -15,13 +17,30 @@ export default {
     openCloseOffCanvas(status) {
       if (status) {
         this.$refs.offCanvas.openNav()
-        this.$refs.filterWindow.navOpen()
-        this.$refs.studentTable.navOpen()
+        if (this.$refs.studentTable.$data.isVisible) {
+          this.$refs.studentTable.navOpen()
+        }
+        // this.$refs.correctionTable.navOpen()
+        if (this.$refs.filterWindow.$data.isVisible) {
+          this.$refs.filterWindow.navOpen()
+        }
       } else {
         this.$refs.offCanvas.closeNav()
-        this.$refs.filterWindow.navClose()
-        this.$refs.studentTable.navClose()
+        if (this.$refs.studentTable.$data.isVisible) {
+          this.$refs.studentTable.navClose()
+        }
+        // this.$refs.correctionTable.navClose()
+        if (this.$refs.filterWindow.$data.isVisible) {
+          this.$refs.filterWindow.navClose()
+        }
       }
+    },
+    showStudentTable() {
+      this.$refs.studentTable.toggleVisibility()
+    },
+    test() {
+      // this.$refs.filterWindow.$data.isVisible = true
+      this.$refs.studentTable.$data.isVisible = false
     }
   }
 }
@@ -29,13 +48,15 @@ export default {
 
 <template>
   <main class="flex-col">
+    <button type="button" @click="test">CLICK ME</button>
     <div class="margin-bottom top-layer">
       <NavigationBar ref="navigationBar" @trigger-off-canvas="openCloseOffCanvas" />
     </div>
 
     <OffCanvasNavBar ref="offCanvas" />
-    <FilterWindow ref="filterWindow" />
-    <StudentTable ref="studentTable" />
+    <FilterWindow ref="filterWindow" @filtered="showStudentTable" />
+    <StudentTable ref="studentTable" @closeStudentTable="() => {this.$refs.filterWindow.$data.isVisible = true}" />
+    <!--    <CorrectionTable ref="correctionTable" />-->
   </main>
 
 </template>
@@ -54,6 +75,6 @@ export default {
 
 
 .margin-bottom {
-  margin-bottom: 10vh;
+  margin-bottom: 3vh;
 }
 </style>
