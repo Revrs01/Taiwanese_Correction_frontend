@@ -1,77 +1,105 @@
 <script>
 import StudentBody from '@/components/StudentBody.vue'
 import axios from 'axios'
+import { store } from '@/components/store.js'
+import CorrectionTable from '@/components/CorrectionTable.vue'
 
 export default {
-  components: { StudentBody },
+  emits: ['keep-only-one-student', 'revert-student-information'],
+  props: {
+    studentInformation: {
+      type: Array,
+      required: true
+    }
+  },
+  components: {
+    StudentBody,
+    CorrectionTable
+  },
   data() {
     return {
-      isVisible: false,
-      studentInformation: [],
+      isCorrecting: false,
+      studentCorrectionProgress: [],
+      studentCorrectionProgressBak: [],
       studentInformationTemp: []
     }
   },
+  async mounted() {
+    await this.getStudentProgress()
+  },
+  computed: {
+    convertGender() {
+      return (gender) => {
+        return gender === '1' ? '男' : '女'
+      }
+    },
+    defineStatus() {
+      return (progress) => {
+        return progress === 100 ? '已完成' : progress === 0 ? '未校正' : '校正中'
+      }
+    }
+  },
   methods: {
-    navOpen() {
-      this.$refs.correctionTable.classList.toggle('push-right')
-    },
-    navClose() {
-      this.$refs.correctionTable.classList.toggle('push-right')
-    },
-    toggleVisibility() {
-      this.isVisible = !this.isVisible
-    },
-    getStudentInformation() {
-      axios.post('http://localhost:31109/fetch_students', {
-
-        startIndex: 0
-      })
-        .then(response => {
-          // console.log(response.data)
-          this.studentInformation = response.data
-          console.log(this.studentInformation)
+    async getStudentProgress() {
+      this.studentCorrectionProgress = []
+      for (let studentInfo of this.studentInformation) {
+        await axios.post(store.apiBaseURL + '/get_correction_progress', {
+          studentKey: `${studentInfo['schoolName']}_${studentInfo['grade']}_${studentInfo['studentClass']}_${studentInfo['seatNumber']}_${studentInfo['studentName']}_${studentInfo['birthdayYear']}_${studentInfo['birthdayMonth']}_${studentInfo['birthdayDay']}_${studentInfo['gender']}`
         })
+          .then(response => {
+            this.studentCorrectionProgress.push(response.data['progress'])
+          })
+      }
 
     },
-    handleKeepOnlyMe(index) {
-      // this.visibleStudentIndex = index;
-      this.studentInformationTemp = this.studentInformation
-      this.studentInformation = [this.studentInformationTemp[index]]
+    keepOnlySelectedStudent(index) {
+      this.studentCorrectionProgressBak = this.studentCorrectionProgress
+      this.studentCorrectionProgress = [this.studentCorrectionProgressBak[index]]
+      this.$emit('keep-only-one-student', index)
+      this.isCorrecting = true
+    },
+    revertFilteredStudent(index) {
+      this.studentCorrectionProgressBak[index] = this.studentCorrectionProgress[0]
+      this.studentCorrectionProgress = this.studentCorrectionProgressBak
+      this.$emit('revert-student-information')
+      this.isCorrecting = false
     }
   }
 }
 </script>
 
 <template>
-  <transition name="drag-up" @after-leave="() => {this.$emit('closeStudentTable')}">
-    <div v-if="isVisible" class="table-responsive" ref="correctionTable">
-      <table class="table align-items-center table-flush " id="mainTable">
-        <thead class="thead-light">
-        <tr>
-          <th scope="col" style="font-size: 18px;">學生姓名</th>
-          <th scope="col" style="font-size: 18px;">年級班級座號</th>
-          <!--        <th scope="col" style="font-size: 18px;">年級</th>-->
-          <!--        <th scope="col" style="font-size: 18px;">班級</th>-->
-          <!--        <th scope="col" style="font-size: 18px;">座號</th>-->
-          <th scope="col" style="font-size: 18px;">性別</th>
-          <th scope="col" style="font-size: 18px;">狀態</th>
-          <th scope="col" style="font-size: 18px;">完成度</th>
-          <th scope="col" style="font-size: 18px;">校正按鈕</th>
-        </tr>
-        </thead>
-        <StudentBody
+  <div class="table-responsive" ref="correctionTable">
+    <table class="table align-items-center table-flush " id="mainTable">
+      <thead class="thead-light">
+      <tr>
+        <th scope="col" style="font-size: 18px;">學生姓名</th>
+        <th scope="col" style="font-size: 18px;">年級班級座號</th>
+        <th scope="col" style="font-size: 18px;">性別</th>
+        <th scope="col" style="font-size: 18px;">狀態</th>
+        <th scope="col" style="font-size: 18px;">完成度</th>
+        <th scope="col" style="font-size: 18px;">校正按鈕</th>
+      </tr>
+      </thead>
+      <StudentBody
+        v-for="(information, index) in this.studentInformation"
+        :key="information"
+        :student-name="`${information['studentName']}`"
+        :class-info="`${information['grade']}年 ${information['studentClass']}班 ${information['seatNumber']}號`"
+        :gender="convertGender(information['gender'])"
+        :correction-status="defineStatus(studentCorrectionProgress[index])"
+        :progress="studentCorrectionProgress[index]"
+        @keep-only-me="keepOnlySelectedStudent(index)"
+        @back-to-student-info="revertFilteredStudent"
+      />
 
-          v-for="(information, index) in this.studentInformation"
-          :key="index"
-          :student-name="information['studentName']"
-          :class-info="`${information['grade']}年 ${information['studentClass']}班 ${information['seatNumber']}號`"
-          :gender="`${information['gender'] === '1' ? '男' : '女'}`"
-          @keep-only-me="handleKeepOnlyMe(index)"
-        />
 
-      </table>
-    </div>
-  </transition>
+    </table>
+    <CorrectionTable
+      v-if="isCorrecting"
+      :student-information="studentInformation[0]"
+    />
+  </div>
 </template>
 
 <style>

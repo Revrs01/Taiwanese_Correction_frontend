@@ -36,11 +36,3 @@ a,
     overflow-y: scroll;
   }
 }
-
-.push-right {
-  transform: translateX(20%);
-}
-
-.pull-up {
-  transform: translateY(-60vh);
-}
