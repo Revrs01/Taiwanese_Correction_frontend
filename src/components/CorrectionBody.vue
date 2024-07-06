@@ -1,5 +1,6 @@
 <script>
 export default {
+  emits: ["assessment-value-update"],
   props: {
     question: {
       type: String,
@@ -14,7 +15,7 @@ export default {
   },
   data() {
     return {
-      buttonKeys: ['1', '2', '3', '4', 'X']
+      buttonKeys: ['1', '2', '3', '4', 'X'],
     }
   },
   computed: {
@@ -46,7 +47,7 @@ export default {
       return text[key]
     },
     handleClick(key) {
-      this.$emit('assessment-value-change', key)
+      this.$emit('assessment-value-update', key)
     }
   }
 }

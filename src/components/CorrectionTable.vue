@@ -39,12 +39,11 @@ export default defineComponent({
           // this.getCorrectionDetails()
         })
     },
-
     async getCorrectionDetails(studentKey) {
       const studentInfo = {
         studentKey: studentKey
       }
-      console.log(studentInfo)
+      // console.log(studentInfo)
 
       await axios.post(store.apiBaseURL + '/get_correction_details', studentInfo)
         .then(response => {
@@ -53,8 +52,33 @@ export default defineComponent({
           for (let i of this.questionOrder) {
             this.correctionDetails.push(temp[i])
           }
-          console.log(this.correctionDetails)
+          // console.log(this.correctionDetails)
         })
+    },
+    async updateAssessmentValue(updatedValue, questionIndex, index) {
+      let studentId = `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`
+      // console.log(updatedValue, questionIndex)
+      await axios.post(store.apiBaseURL + '/update_correction_details', {
+        studentId: studentId,
+        questionIndex: questionIndex,
+        value: updatedValue
+      })
+        .then(async () => {
+          await this.syncAssessmentValueUpdate(studentId, index, questionIndex)
+        })
+    },
+    async syncAssessmentValueUpdate(studentId, index, questionIndex) {
+      try {
+        await axios.post(store.apiBaseURL + '/get_correction_details', {
+          studentKey: studentId
+        })
+          .then(response => {
+            this.correctionDetails[index] = response.data[questionIndex]
+            console.log('Sync with DB')
+          })
+      } catch (e) {
+        alert(e)
+      }
     }
   }
 })
@@ -75,6 +99,7 @@ export default defineComponent({
         :key="index"
         :question="question"
         :assessment="correctionDetails[index]"
+        @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
       />
 
     </table>
