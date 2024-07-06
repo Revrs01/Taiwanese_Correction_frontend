@@ -1,38 +1,7 @@
-<template>
-  <tbody>
-  <tr>
-    <th scope="row" class="th-block">{{ studentName }}</th>
-    <th scope="row" class="th-block">{{ classInfo }}</th>
-    <th scope="row" class="th-block">{{ gender }}</th>
-    <th class="th-block">
-      校正中
-    </th>
-    <td class="th-block" style="max-width: 100px;">
-      <div class="d-flex align-items-center justify-contents-center">
-        <div>
-          <span class="progress-percent">69%</span>
-        </div>
-        <div>
-          <div class="progress" style="height: 15px;">
-            <div class="progress-bar" role="progressbar" aria-valuenow="69"
-                 aria-valuemin="0" aria-valuemax="100" style="width: 69%; background-color: #2dce89"></div>
-          </div>
-        </div>
-      </div>
-    </td>
-    <th scope="row">
-      <div class="d-flex">
-        <button class="btn" style="color: white; background-color: orange; width: 100%;" @click="startCorrection">進入校正
-        </button>
-      </div>
-    </th>
-  </tr>
-
-  </tbody>
-</template>
 <script>
 export default {
   name: 'StudentBody',
+  emits: ['keep-only-me', 'back-to-student-info'],
   props: {
     studentName: {
       type: String,
@@ -46,18 +15,90 @@ export default {
       type: String,
       required: true
     },
+    correctionStatus: {
+      type: String,
+      required: true
+    },
+    progress: {
+      type: Number,
+      required: false
+    }
   },
   data() {
-    return {}
+    return {
+      currentButtonTextIndex: 0
+    }
   },
   methods: {
     startCorrection() {
+      // buttonText: ["intoCorrection", "backToStudentInformation"]
+      this.currentButtonTextIndex = 1
       this.$emit('keep-only-me')
+    },
+    exitCorrection() {
+      this.currentButtonTextIndex = 0
+      this.$emit('back-to-student-info')
     }
   }
 }
 </script>
+
+<template>
+  <tbody>
+  <tr>
+    <th scope="row" class="th-block">{{ studentName }}</th>
+    <th scope="row" class="th-block">{{ classInfo }}</th>
+    <th scope="row" class="th-block">{{ gender }}</th>
+    <th class="th-block">{{ correctionStatus }}</th>
+    <td class="th-block" style="max-width: 100px;">
+      <div class="d-flex align-items-center justify-contents-center">
+        <div>
+          <span class="progress-percent">{{ progress }}%</span>
+        </div>
+        <div>
+          <div class="progress" style="height: 15px;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}"
+                 aria-valuemin="0" aria-valuemax="100"
+                 :style="{ width: progress + '%', backgroundColor: '#2dce89' }">
+            </div>
+          </div>
+        </div>
+      </div>
+    </td>
+    <th scope="row">
+      <div class="d-flex">
+        <button v-if="currentButtonTextIndex === 0" class="btn"
+                style="color: white; background-color: orange; width: 100%;" @click="startCorrection">進入校正
+        </button>
+        <button v-if="currentButtonTextIndex === 1" class="btn"
+                style="color: white; background-color: #ff6a00; width: 100%;" @click="exitCorrection">返回學生頁面
+        </button>
+      </div>
+    </th>
+  </tr>
+
+  </tbody>
+</template>
+
 <style>
+.drag-up-enter-active {
+  transition: transform 0.6s, opacity 0.3s;
+}
+
+.drag-up-leave-active {
+  transition: transform 0.6s, opacity 0.3s;
+}
+
+.drag-up-enter-from, .drag-up-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.drag-up-leave {
+  transform: translateY(0);
+  opacity: 1;
+}
+
 .progress-percent {
   margin-right: .5rem !important;
   min-width: 34px;

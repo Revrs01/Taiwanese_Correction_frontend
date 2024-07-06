@@ -1,63 +1,43 @@
 <script>
 import NavigationBar from '@/components/NavigationBar.vue'
-import FilterWindow from '@/components/FilterWindow.vue'
-import OffCanvasNavBar from '@/components/OffCanvasNavBar.vue'
-import StudentTable from '@/components/StudentTable.vue'
-// import CorrectionTable from '@/components/CorrectionTable.vue'
-
+import CorrectionMainWidget from '@/components/CorrectionMainWidget.vue'
 export default {
+  data() {
+    return {
+      currentCorrectionStudentInfo: {},
+      displayIcon: "list",
+      isSideNavOpened: null
+    }
+  },
   components: {
     // CorrectionTable,
-    NavigationBar,
-    FilterWindow,
-    OffCanvasNavBar,
-    StudentTable
+    CorrectionMainWidget,
+    NavigationBar
   },
   methods: {
-    openCloseOffCanvas(status) {
-      if (status) {
-        this.$refs.offCanvas.openNav()
-        if (this.$refs.studentTable.$data.isVisible) {
-          this.$refs.studentTable.navOpen()
-        }
-        // this.$refs.correctionTable.navOpen()
-        if (this.$refs.filterWindow.$data.isVisible) {
-          this.$refs.filterWindow.navOpen()
-        }
-      } else {
-        this.$refs.offCanvas.closeNav()
-        if (this.$refs.studentTable.$data.isVisible) {
-          this.$refs.studentTable.navClose()
-        }
-        // this.$refs.correctionTable.navClose()
-        if (this.$refs.filterWindow.$data.isVisible) {
-          this.$refs.filterWindow.navClose()
-        }
-      }
+    goToStudentTable() {
+      this.displayIcon = "arrow"
     },
-    showStudentTable() {
-      this.$refs.studentTable.toggleVisibility()
-      this.$refs.studentTable.getStudentInformation()
+    backToFilterWindow() {
+      this.displayIcon = "list"
     },
-    test() {
-      // this.$refs.filterWindow.$data.isVisible = true
-      this.$refs.studentTable.$data.isVisible = false
-    }
+
   }
 }
 </script>
 
 <template>
   <main class="flex-col">
-    <button type="button" @click="test">CLICK ME</button>
     <div class="margin-bottom top-layer">
-      <NavigationBar ref="navigationBar" @trigger-off-canvas="openCloseOffCanvas" />
+      <NavigationBar
+        :nav-bar-icon="displayIcon"
+        @back-to-filter-window="backToFilterWindow"
+      />
     </div>
-
-    <OffCanvasNavBar ref="offCanvas" />
-    <FilterWindow ref="filterWindow" @filtered="showStudentTable" />
-    <StudentTable ref="studentTable" @closeStudentTable="() => {this.$refs.filterWindow.$data.isVisible = true}" />
-    <!--    <CorrectionTable ref="correctionTable" />-->
+    <CorrectionMainWidget
+      :should-stop-correction="this.displayIcon === 'list'"
+      @change-icon="goToStudentTable"
+    />
   </main>
 
 </template>

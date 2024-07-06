@@ -1,48 +1,83 @@
 <script>
 import NavigationBarIcon from '@/components/icons/NavigationBarIcon.vue'
+import PointLeftArrowIcon from '@/components/icons/PointLeftArrowIcon.vue'
 import OffCanvasNavBar from '@/components/OffCanvasNavBar.vue'
+
+
 export default {
-  emits: ['trigger-off-canvas'],
+  emits: ["back-to-filter-window", "is-side-nav-opened"],
+  props: {
+    navBarIcon: {
+      type: String
+    }
+  },
   components: {
     OffCanvasNavBar,
-    NavigationBarIcon
+    NavigationBarIcon,
+    PointLeftArrowIcon
   },
   data() {
     return {
-      isClicked: false
+      isSideNavOpened: false
     }
   },
   methods: {
-    triggerClickNavBtn() {
-      this.isClicked = !this.isClicked
-      this.$emit("trigger-off-canvas", this.isClicked)
+    clickNavButton() {
+      if (this.navBarIcon === 'list') {
+        this.isSideNavOpened = !this.isSideNavOpened
+      } else {
+        this.$emit('back-to-filter-window')
+      }
     }
 
+  },
+  computed: {
+    sideNavClass() {
+      return this.isSideNavOpened ? 'open-navbar' : ''
+    }
   }
+
 }
 </script>
 
 <template>
   <div class="navbar">
     <div style="width: 3px"></div>
-    <div class="navbar-svg list-toggle" @click="triggerClickNavBtn">
-      <NavigationBarIcon style="width: 40px; height: 40px" />
+    <div class="navbar-svg list-toggle" @click="clickNavButton">
+      <NavigationBarIcon
+        v-if="navBarIcon === 'list'"
+        class="icon" />
+      <PointLeftArrowIcon
+        v-if="navBarIcon === 'arrow'"
+        class="icon" />
     </div>
     <div style="width: 12px"></div>
     <div class="navbar-block">
       成功大學 台灣文學系 校正網站
     </div>
   </div>
-  <OffCanvasNavBar/>
+  <OffCanvasNavBar
+    :class="sideNavClass"
+  />
 </template>
 
 <style scoped>
+.open-navbar {
+  transform: translateX(200px);
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+}
+
 .navbar {
   display: flex;
   flex-direction: row;
   width: 100vw;
   height: 15%;
   background-color: grey;
+  max-height: 70px;
 }
 
 .navbar-svg {
@@ -64,5 +99,6 @@ export default {
   align-content: center;
   color: white;
   font-size: 36px;
+  overflow-x: hidden;
 }
 </style>

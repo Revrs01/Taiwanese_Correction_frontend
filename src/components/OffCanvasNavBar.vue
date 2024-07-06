@@ -1,20 +1,12 @@
 <script>
 export default {
-  methods: {
-    openNav() {
-      this.$refs.sideNav.style.width = '15%'
-      this.$refs.sideNav.style.marginLeft = '10%'
-    },
-    closeNav() {
-      this.$refs.sideNav.style.width = '0'
-      this.$refs.sideNav.style.marginLeft = '-10%'
-    }
-  }
+
+
 }
 </script>
 
 <template>
-  <div id="mySidenav" class="sidenav" ref="sideNav">
+  <div class="sidenav" ref="sideNav">
     <a href="#">About</a>
     <a href="#">Services</a>
     <a href="#">Clients</a>
@@ -25,15 +17,15 @@ export default {
 <style scoped>
 .sidenav {
   height: 100%;
-  width: 0;
+  width: 200px;
   position: fixed;
-  z-index: 0;
+  z-index: -1;
   top: 0;
-  left: -10%;
+  left: -200px;
   background-color: rgba(211, 211, 211, 0.6);
   overflow-x: hidden;
   transition: 0.5s;
-  padding-top: 5%;
+  padding-top: 80px;
   border-radius: 0 0 50px 0;
   border: thin solid dimgray;
 }
