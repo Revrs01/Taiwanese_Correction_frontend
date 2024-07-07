@@ -1,6 +1,6 @@
 <script>
 
-import { defineComponent } from 'vue'
+import { defineComponent, toRef } from 'vue'
 import CorrectionBody from '@/components/CorrectionBody.vue'
 import axios from 'axios'
 import { store } from '@/components/store.js'
@@ -9,6 +9,10 @@ export default defineComponent({
   props: {
     studentInformation: {
       type: Object,
+      required: true
+    },
+    correctionRef: {
+      type: String,
       required: true
     }
   },
@@ -30,7 +34,8 @@ export default defineComponent({
   methods: {
     async getCorrectionData() {
       await axios.post(store.apiBaseURL + '/fetch_test_question', {
-        studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high'
+        studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high',
+
       })
         .then(response => {
           this.questionOrder = response.data['_order']
@@ -39,9 +44,11 @@ export default defineComponent({
           // this.getCorrectionDetails()
         })
     },
-    async getCorrectionDetails(studentKey) {
+    async getCorrectionDetails(studentKey, studentLevel) {
       const studentInfo = {
-        studentKey: studentKey
+        studentKey: studentKey,
+        studentLevel: studentLevel,
+        correctionRef: this.correctionRef
       }
       // console.log(studentInfo)
 

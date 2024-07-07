@@ -10,6 +10,10 @@ export default {
     studentInformation: {
       type: Array,
       required: true
+    },
+    correctionRef: {
+      type: String,
+      required: true
     }
   },
   components: {
@@ -98,6 +102,7 @@ export default {
     <CorrectionTable
       v-if="isCorrecting"
       :student-information="studentInformation[0]"
+      :correction-ref="correctionRef"
     />
   </div>
 </template>

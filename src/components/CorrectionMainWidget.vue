@@ -19,7 +19,8 @@ export default {
       studentInformationBak: [],
       isFilterWindowVisible: true,
       isStudentTableVisible: false,
-      currentState: this.state
+      currentState: this.state,
+      correctionRef: ''
     }
   },
   components: {
@@ -29,6 +30,7 @@ export default {
   methods: {
     async getStudentInformation(options) {
       try {
+        this.correctionRef = options.correctionRef
         await axios.post(store.apiBaseURL + '/filter_by_options', options)
         .then((response) => {
           this.studentInformation = response.data
@@ -75,6 +77,7 @@ export default {
   <StudentTable
     v-if="isStudentTableVisible"
     :student-information="studentInformation"
+    :correction-ref="correctionRef"
     @keep-only-one-student="keepOnlyOneStudent"
     @revert-student-information="revertStudentInformation"
   />

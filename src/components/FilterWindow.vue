@@ -10,7 +10,8 @@ export default {
       distinctFilterSelection: {},
       selectedSchool: '',
       selectedGrade: '',
-      selectedClass: ''
+      selectedClass: '',
+      correctionRef: ''
     }
   },
   mounted() {
@@ -33,11 +34,16 @@ export default {
         alert('請至少選擇一個進行篩選')
         return
       }
+      if (!this.correctionRef) {
+        alert('請選擇校正表單')
+        return
+      }
       let options = {
         options: {
           schoolName: this.selectedSchool,
           studentClass: this.selectedClass,
-          grade: this.selectedGrade
+          grade: this.selectedGrade,
+          correctionRef: this.correctionRef
         }
       }
       this.$emit('filter-student', options)
@@ -87,6 +93,13 @@ export default {
           </option>
         </select>
       </div>
+    </div>
+    <div class="row">
+      <select class="select-block padding-start" v-model="correctionRef">
+        <option value="" selected>選擇校正表單</option>
+        <option value="2023_02">全部學生</option>
+        <option value="2024_07">第二次校正</option>
+      </select>
     </div>
     <div class="row">
       <button type="button" class="select-block shorten-button-size button-color"
