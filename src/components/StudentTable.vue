@@ -28,8 +28,8 @@ export default {
       studentInformationTemp: []
     }
   },
-  async mounted() {
-    await this.getStudentProgress()
+  mounted() {
+    this.getStudentProgress()
   },
   computed: {
     convertGender() {
@@ -48,10 +48,12 @@ export default {
       this.studentCorrectionProgress = []
       for (let studentInfo of this.studentInformation) {
         await axios.post(store.apiBaseURL + '/get_correction_progress', {
-          studentKey: `${studentInfo['schoolName']}_${studentInfo['grade']}_${studentInfo['studentClass']}_${studentInfo['seatNumber']}_${studentInfo['studentName']}_${studentInfo['birthdayYear']}_${studentInfo['birthdayMonth']}_${studentInfo['birthdayDay']}_${studentInfo['gender']}`
+          studentKey: `${studentInfo['schoolName']}_${studentInfo['grade']}_${studentInfo['studentClass']}_${studentInfo['seatNumber']}_${studentInfo['studentName']}_${studentInfo['birthdayYear']}_${studentInfo['birthdayMonth']}_${studentInfo['birthdayDay']}_${studentInfo['gender']}`,
+          correctionRef: this.correctionRef
         })
           .then(response => {
             this.studentCorrectionProgress.push(response.data['progress'])
+
           })
       }
 

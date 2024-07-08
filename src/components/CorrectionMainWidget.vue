@@ -30,7 +30,7 @@ export default {
   methods: {
     async getStudentInformation(options) {
       try {
-        this.correctionRef = options.correctionRef
+        this.correctionRef = options.options.correctionRef
         await axios.post(store.apiBaseURL + '/filter_by_options', options)
         .then((response) => {
           this.studentInformation = response.data
