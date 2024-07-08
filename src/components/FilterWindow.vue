@@ -10,7 +10,8 @@ export default {
       distinctFilterSelection: {},
       selectedSchool: '',
       selectedGrade: '',
-      selectedClass: ''
+      selectedClass: '',
+      correctionRef: ''
     }
   },
   mounted() {
@@ -33,11 +34,16 @@ export default {
         alert('請至少選擇一個進行篩選')
         return
       }
+      if (!this.correctionRef) {
+        alert('請選擇校正表單')
+        return
+      }
       let options = {
         options: {
           schoolName: this.selectedSchool,
           studentClass: this.selectedClass,
-          grade: this.selectedGrade
+          grade: this.selectedGrade,
+          correctionRef: this.correctionRef
         }
       }
       this.$emit('filter-student', options)
@@ -47,7 +53,7 @@ export default {
 </script>
 
 <template>
-  <div class="window-block flex-col" ref="filterWindowRoot">
+  <div class="window-block flex-col height-limit" ref="filterWindowRoot">
     <div class="col input-block">
       <div class="filter-title">學校名稱</div>
       <select class="select-block padding-start" v-model="selectedSchool">
@@ -88,7 +94,15 @@ export default {
         </select>
       </div>
     </div>
-    <div class="row">
+    <div class="col input-block">
+      <div class="filter-title">校正表單</div>
+      <select class="select-block padding-start" v-model="correctionRef">
+        <option value="" selected>選擇校正表單</option>
+        <option value="2023_02">全部學生</option>
+        <option value="2024_07">第二次校正</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top: 10px">
       <button type="button" class="select-block shorten-button-size button-color"
               @click="filterStudent">送出篩選
       </button>
@@ -178,5 +192,9 @@ export default {
 .button-color:hover {
   background-color: seagreen;
   cursor: pointer;
+}
+
+.height-limit {
+  height: 375px;
 }
 </style>

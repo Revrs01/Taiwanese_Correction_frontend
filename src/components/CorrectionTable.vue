@@ -10,38 +10,47 @@ export default defineComponent({
     studentInformation: {
       type: Object,
       required: true
+    },
+    correctionRef: {
+      type: String,
+      required: true
     }
   },
   components: { CorrectionBody },
   data() {
     return {
-
+      studentLevel: `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`,
       questionOrder: [],
       questionList: [],
       correctionDetails: [],
-      currentStudentKey: ''
+      currentStudentKey: '',
+      buttonKeys: []
     }
   },
   async mounted() {
     // this.isMounted = true
     await this.getCorrectionData()
-    await this.getCorrectionDetails(`${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`)
+    await this.getCorrectionDetails(this.studentLevel, this.studentInformation['grade'] <= 2 ? 'low' : 'high')
   },
   methods: {
     async getCorrectionData() {
       await axios.post(store.apiBaseURL + '/fetch_test_question', {
-        studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high'
+        studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high',
+        correctionRef: this.correctionRef
       })
         .then(response => {
           this.questionOrder = response.data['_order']
           this.questionList = response.data['questionList']
+          this.buttonKeys = response.data['buttonKeys']
           // this.correctionData = response.data
           // this.getCorrectionDetails()
         })
     },
-    async getCorrectionDetails(studentKey) {
+    async getCorrectionDetails(studentKey, studentLevel) {
       const studentInfo = {
-        studentKey: studentKey
+        studentKey: studentKey,
+        studentLevel: studentLevel,
+        correctionRef: this.correctionRef
       }
       // console.log(studentInfo)
 
@@ -50,6 +59,8 @@ export default defineComponent({
           let temp = response.data
           this.correctionDetails = []
           for (let i of this.questionOrder) {
+            // correctionDetails will contain undefined if question is not stored in correctionTable
+            // this won't cause any error I think ...
             this.correctionDetails.push(temp[i])
           }
           // console.log(this.correctionDetails)
@@ -70,7 +81,9 @@ export default defineComponent({
     async syncAssessmentValueUpdate(studentId, index, questionIndex) {
       try {
         await axios.post(store.apiBaseURL + '/get_correction_details', {
-          studentKey: studentId
+          studentKey: studentId,
+          studentLevel: this.studentLevel,
+          correctionRef: this.correctionRef
         })
           .then(response => {
             this.correctionDetails[index] = response.data[questionIndex]
@@ -99,6 +112,7 @@ export default defineComponent({
         :key="index"
         :question="question"
         :assessment="correctionDetails[index]"
+        :button-keys="buttonKeys[index]"
         @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
       />
 
