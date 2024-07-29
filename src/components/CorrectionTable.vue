@@ -26,7 +26,11 @@ export default defineComponent({
       questionList: [],
       correctionDetails: [],
       currentStudentKey: '',
-      buttonKeys: []
+      buttonKeys: [],
+      isCorrectingSyllable: false,
+      currentCorrectingSyllable: null,
+      currentCorrectingQuestion: null,
+      currentCorrectingQuestionOrder: null
     }
   },
   async mounted() {
@@ -43,6 +47,7 @@ export default defineComponent({
         .then(response => {
           this.questionOrder = response.data['_order']
           this.questionList = response.data['questionList']
+          // console.log(this.questionOrder)
           this.buttonKeys = response.data['buttonKeys']
           // this.correctionData = response.data
           // this.getCorrectionDetails()
@@ -60,7 +65,7 @@ export default defineComponent({
         .then(response => {
           let temp = response.data
           if (response.status === 701) {
-            alert("這位學生沒有第一次校正的結果")
+            alert('這位學生沒有第一次校正的結果')
             return
           }
           this.correctionDetails = []
@@ -99,6 +104,21 @@ export default defineComponent({
       } catch (e) {
         alert(e)
       }
+    },
+    startCorrectingSyllable(whichSyllable, questionOrder, question) {
+      // console.log(whichSyllable, questionOrder, question)
+      this.isCorrectingSyllable = true
+      this.currentCorrectingQuestionOrder = questionOrder
+      this.currentCorrectingQuestion = question
+      this.currentCorrectingSyllable = whichSyllable
+    },
+    endCorrectingSyllable(emitObject) {
+      this.isCorrectingSyllable = false
+      this.currentCorrectingQuestion = null
+      this.currentCorrectingSyllable = null
+      // need to update the returned update value to DB
+      // emitObject contains 4 keys, isSentence, returnValue, questionOrder, whichSyllable
+      console.log(emitObject)
     }
   }
 })
@@ -121,8 +141,15 @@ export default defineComponent({
         :assessment="correctionDetails[index]"
         :button-keys="buttonKeys[index]"
         @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
+        @start-syllable-correction="startCorrectingSyllable($event, questionOrder[index], question)"
       />
-      <DetailCorrectionPage />
+      <DetailCorrectionPage
+        v-if="isCorrectingSyllable"
+        :question="currentCorrectingQuestion"
+        :question-order="currentCorrectingQuestionOrder"
+        :which-syllable="currentCorrectingSyllable"
+        @update-syllable-correction="endCorrectingSyllable($event)"
+      />
     </table>
   </div>
 </template>

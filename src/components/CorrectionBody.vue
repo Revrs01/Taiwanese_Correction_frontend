@@ -1,6 +1,6 @@
 <script>
 export default {
-  emits: ['assessment-value-update'],
+  emits: ['assessment-value-update', 'start-syllable-correction'],
   props: {
     question: {
       type: String,
@@ -18,7 +18,6 @@ export default {
   },
   data() {
     return {
-      // buttonKeys: ['1', '2', '3', '4', 'X']
     }
   },
   computed: {
@@ -57,6 +56,9 @@ export default {
     },
     handleClick(key) {
       this.$emit('assessment-value-update', key)
+    },
+    startSyllableCorrection(whichSyllable) {
+      this.$emit('start-syllable-correction', whichSyllable)
     }
   }
 }
@@ -72,6 +74,7 @@ export default {
         <source src='data:audio/wav;base64,${audioString}' type="audio/wav">
       </audio>
     </th>
+    <!--  if buttonKeys is Array, it's 1st correction  -->
     <th class="th-block" v-if="Array.isArray(buttonKeys)">
       <button
         v-for="_key in buttonKeys"
@@ -83,14 +86,15 @@ export default {
       >{{ buttonText(_key) }}
       </button>
     </th>
+    <!--  otherwise, it'll receive a Number as syllable count  -->
     <th class="th-block" v-else>
       <button
         v-for="index in buttonKeys"
         :key="index"
         class="btn btn-primary"
+        @click="startSyllableCorrection(index)"
       >{{ syllableText(index) }}</button>
     </th>
-
   </tr>
 
   </tbody>

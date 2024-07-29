@@ -1,13 +1,15 @@
 <script>
 export default {
+  emits: ['update-syllable-correction'],
   props: {
     question: {
-      type: String,
-      default: "None"
+      type: String
+    },
+    questionOrder: {
+      type: String
     },
     whichSyllable: {
-      type: Number,
-      default: 1
+      type: Number
     },
     audioPronunciation: {
       type: String
@@ -19,6 +21,7 @@ export default {
   data() {
     return {
       openUserInputField: false,
+      currentPickedButton: null,
       buttonList: {
         '1': '1 入聲消失',
         '2': '2 入聲念成 p',
@@ -40,8 +43,28 @@ export default {
     }
   },
   methods: {
-    updateCorrection(buttonIndex) {
+    buttonClickHandler(buttonIndex) {
+      // check whether input field should be opened
       this.openUserInputField = buttonIndex === '16'
+
+      // update current pick
+      this.currentPickedButton = buttonIndex
+    },
+    saveChangedCorrection() {
+      let emitObject = {
+        questionOrder: this.questionOrder,
+        whichSyllable: this.whichSyllable,
+        isSentence: false,
+        returnValue: null
+      }
+      if (this.currentPickedButton === '16') {
+        emitObject['isSentence'] = true
+        emitObject['returnValue'] = this.$refs.inputField.value
+      } else {
+        emitObject['returnValue'] = this.currentPickedButton
+      }
+
+      this.$emit('update-syllable-correction', emitObject)
     }
   }
 }
@@ -67,7 +90,7 @@ export default {
           v-for="index in 16"
           :key="index"
           class="btn correction-btn"
-          @click="updateCorrection(index.toString())"
+          @click="buttonClickHandler(index.toString())"
         >{{ buttonList[index.toString()] }}
         </button>
       </div>
@@ -75,8 +98,9 @@ export default {
       <input
         v-if="openUserInputField"
         class="input-text-block"
+        ref="inputField"
         placeholder="請輸入其他錯誤描述">
-      <button class="save-button" @click="() => {this.$refs.modalBody.style.display='none';}">儲存變更</button>
+      <button class="save-button" @click="saveChangedCorrection">儲存變更</button>
 
     </div>
 
@@ -133,7 +157,7 @@ export default {
 }
 
 .modal {
-  display: none; /* Hidden by default */
+  display: block; /* Hidden by default */
   position: fixed; /* Stay in place */
   z-index: 1; /* Sit on top */
   padding-top: 100px; /* Location of the box */
