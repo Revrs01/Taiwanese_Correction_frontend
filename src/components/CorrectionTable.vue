@@ -2,6 +2,7 @@
 
 import { defineComponent } from 'vue'
 import CorrectionBody from '@/components/CorrectionBody.vue'
+import DetailCorrectionPage from '@/components/DetailCorrectionPage.vue'
 import axios from 'axios'
 import { store } from '@/components/store.js'
 
@@ -16,10 +17,11 @@ export default defineComponent({
       required: true
     }
   },
-  components: { CorrectionBody },
+  components: { DetailCorrectionPage, CorrectionBody },
   data() {
     return {
-      studentLevel: `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`,
+      studentId: `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`,
+      studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high',
       questionOrder: [],
       questionList: [],
       correctionDetails: [],
@@ -30,7 +32,7 @@ export default defineComponent({
   async mounted() {
     // this.isMounted = true
     await this.getCorrectionData()
-    await this.getCorrectionDetails(this.studentLevel, this.studentInformation['grade'] <= 2 ? 'low' : 'high')
+    await this.getCorrectionDetails()
   },
   methods: {
     async getCorrectionData() {
@@ -46,10 +48,10 @@ export default defineComponent({
           // this.getCorrectionDetails()
         })
     },
-    async getCorrectionDetails(studentKey, studentLevel) {
+    async getCorrectionDetails() {
       const studentInfo = {
-        studentKey: studentKey,
-        studentLevel: studentLevel,
+        studentKey: this.studentId,
+        studentLevel: this.studentLevel,
         correctionRef: this.correctionRef
       }
       // console.log(studentInfo)
@@ -57,6 +59,10 @@ export default defineComponent({
       await axios.post(store.apiBaseURL + '/get_correction_details', studentInfo)
         .then(response => {
           let temp = response.data
+          if (response.status === 701) {
+            alert("這位學生沒有第一次校正的結果")
+            return
+          }
           this.correctionDetails = []
           for (let i of this.questionOrder) {
             // correctionDetails will contain undefined if question is not stored in correctionTable
@@ -67,21 +73,22 @@ export default defineComponent({
         })
     },
     async updateAssessmentValue(updatedValue, questionIndex, index) {
-      let studentId = `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`
+      // let studentId = `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`
       // console.log(updatedValue, questionIndex)
       await axios.post(store.apiBaseURL + '/update_correction_details', {
-        studentId: studentId,
-        questionIndex: questionIndex,
-        value: updatedValue
+        studentId: this.studentId,
+        questionNumber: questionIndex,
+        newValue: updatedValue,
+        correctionRef: this.correctionRef
       })
         .then(async () => {
-          await this.syncAssessmentValueUpdate(studentId, index, questionIndex)
+          await this.syncAssessmentValueUpdate(index, questionIndex)
         })
     },
-    async syncAssessmentValueUpdate(studentId, index, questionIndex) {
+    async syncAssessmentValueUpdate(index, questionIndex) {
       try {
         await axios.post(store.apiBaseURL + '/get_correction_details', {
-          studentKey: studentId,
+          studentKey: this.studentId,
           studentLevel: this.studentLevel,
           correctionRef: this.correctionRef
         })
@@ -115,7 +122,7 @@ export default defineComponent({
         :button-keys="buttonKeys[index]"
         @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
       />
-
+      <DetailCorrectionPage />
     </table>
   </div>
 </template>

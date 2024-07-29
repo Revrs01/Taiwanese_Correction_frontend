@@ -10,10 +10,10 @@ export default {
       type: String
     },
     assessment: {
-      type: String || undefined,
+      type: [String, Object]
     },
     buttonKeys: {
-      type: Array
+      type: [Array, Number]
     }
   },
   data() {
@@ -47,24 +47,13 @@ export default {
         '2': '2 錯誤',
         '3': '3 袂曉',
         '4': '4 不出聲',
-        '5': '5 入聲h',
-        '6': '6 入聲t',
-        '7': '7 入聲p',
-        '8': '8 入聲k',
-        '9': '9 濁音j',
-        '10': '10 濁音g',
-        '11': '11 濁音b',
-        '12': '12 有ing',
-        '13': '13 有ang',
-        '14': '14 鼻音',
-        '15': '15 鼻音nn',
-        '16': '16 鼻音(收尾合唇)',
-        '17': '17 唸成華語',
-        '18': '18 不校正',
         'X': 'X 音檔無聲'
       }
 
       return text[key]
+    },
+    syllableText(key) {
+      return `音節${parseInt(key)}`
     },
     handleClick(key) {
       this.$emit('assessment-value-update', key)
@@ -83,7 +72,7 @@ export default {
         <source src='data:audio/wav;base64,${audioString}' type="audio/wav">
       </audio>
     </th>
-    <th class="th-block">
+    <th class="th-block" v-if="Array.isArray(buttonKeys)">
       <button
         v-for="_key in buttonKeys"
         :key="_key"
@@ -93,6 +82,13 @@ export default {
         @click="handleClick(_key)"
       >{{ buttonText(_key) }}
       </button>
+    </th>
+    <th class="th-block" v-else>
+      <button
+        v-for="index in buttonKeys"
+        :key="index"
+        class="btn btn-primary"
+      >{{ syllableText(index) }}</button>
     </th>
 
   </tr>
@@ -115,5 +111,10 @@ export default {
 
 .btn-invisible {
   visibility: hidden;
+}
+
+.btn-primary {
+  color: white;
+  background-color: #0d6efd;
 }
 </style>
