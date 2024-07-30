@@ -6,6 +6,10 @@ export default {
       type: String,
       required: true
     },
+    questionOrder: {
+      type: String,
+      required: true
+    },
     audio: {
       type: String
     },
@@ -17,8 +21,7 @@ export default {
     }
   },
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
     getButtonClass() {
@@ -36,8 +39,19 @@ export default {
           return 'btn-inactive'
         }
       }
+    },
+    getSyllableClass() {
+      return (syllableNumber) => {
+        // if assessment is undefined means this student doesn't need to second check this question
+        if (this.assessment === undefined) {
+          return null
+        } else if (`${this.questionOrder}_${syllableNumber}` in this.assessment) {
+          return 'btn-active'
+        } else {
+          return 'btn-inactive'
+        }
+      }
     }
-
   },
   methods: {
     buttonText(key) {
@@ -58,7 +72,10 @@ export default {
       this.$emit('assessment-value-update', key)
     },
     startSyllableCorrection(whichSyllable) {
-      this.$emit('start-syllable-correction', whichSyllable)
+      this.$emit('start-syllable-correction', {
+        syllable: whichSyllable,
+        oldValue: this.assessment[`${this.questionOrder}_${whichSyllable}`]
+      })
     }
   }
 }
@@ -91,9 +108,12 @@ export default {
       <button
         v-for="index in buttonKeys"
         :key="index"
-        class="btn btn-primary"
+        class="btn"
+        :class="getSyllableClass(index)"
+        style="color: white; justify-content: space-evenly"
         @click="startSyllableCorrection(index)"
-      >{{ syllableText(index) }}</button>
+      >{{ syllableText(index) }}
+      </button>
     </th>
   </tr>
 
@@ -117,8 +137,4 @@ export default {
   visibility: hidden;
 }
 
-.btn-primary {
-  color: white;
-  background-color: #0d6efd;
-}
 </style>

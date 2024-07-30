@@ -28,9 +28,13 @@ export default defineComponent({
       currentStudentKey: '',
       buttonKeys: [],
       isCorrectingSyllable: false,
+
+      // these are for 2nd correction, args will pass to DetailCorrectionPage
       currentCorrectingSyllable: null,
       currentCorrectingQuestion: null,
-      currentCorrectingQuestionOrder: null
+      currentCorrectingQuestionOrder: null,
+      currentCorrectingQuestionIndex: null,
+      oldSyllableCorrectionValue: null
     }
   },
   async mounted() {
@@ -77,15 +81,17 @@ export default defineComponent({
           // console.log(this.correctionDetails)
         })
     },
-    async updateAssessmentValue(updatedValue, questionIndex, index) {
-      // let studentId = `${this.studentInformation['schoolName']}_${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}_${this.studentInformation['birthdayYear']}_${this.studentInformation['birthdayMonth']}_${this.studentInformation['birthdayDay']}_${this.studentInformation['gender']}`
-      // console.log(updatedValue, questionIndex)
-      await axios.post(store.apiBaseURL + '/update_correction_details', {
+    async updateAssessmentValue(updatedValue, questionIndex, index, syllable = null) {
+      let updateObject = {
         studentId: this.studentId,
         questionNumber: questionIndex,
         newValue: updatedValue,
         correctionRef: this.correctionRef
-      })
+      }
+      if (syllable !== null) {
+        updateObject['syllable'] = syllable
+      }
+      await axios.post(store.apiBaseURL + '/update_correction_details', updateObject)
         .then(async () => {
           await this.syncAssessmentValueUpdate(index, questionIndex)
         })
@@ -105,20 +111,26 @@ export default defineComponent({
         alert(e)
       }
     },
-    startCorrectingSyllable(whichSyllable, questionOrder, question) {
-      // console.log(whichSyllable, questionOrder, question)
-      this.isCorrectingSyllable = true
+    startCorrectingSyllable(emitObject, questionOrder, question, index) {
+      this.oldSyllableCorrectionValue = emitObject['oldValue']
       this.currentCorrectingQuestionOrder = questionOrder
       this.currentCorrectingQuestion = question
-      this.currentCorrectingSyllable = whichSyllable
+      this.currentCorrectingSyllable = emitObject['syllable']
+      this.currentCorrectingQuestionIndex = index
+      this.isCorrectingSyllable = true
     },
     endCorrectingSyllable(emitObject) {
+      this.updateAssessmentValue(emitObject['returnValue'], emitObject['questionOrder'], this.currentCorrectingQuestionIndex, emitObject['whichSyllable'])
       this.isCorrectingSyllable = false
       this.currentCorrectingQuestion = null
       this.currentCorrectingSyllable = null
-      // need to update the returned update value to DB
-      // emitObject contains 4 keys, isSentence, returnValue, questionOrder, whichSyllable
-      console.log(emitObject)
+      this.currentCorrectingQuestionIndex = null
+    },
+    closeDetailCorrectionWithoutSaving() {
+      this.isCorrectingSyllable = false
+      this.currentCorrectingQuestion = null
+      this.currentCorrectingSyllable = null
+      this.currentCorrectingQuestionIndex = null
     }
   }
 })
@@ -138,17 +150,20 @@ export default defineComponent({
         v-for="(question, index) in questionList"
         :key="index"
         :question="question"
+        :question-order="questionOrder[index]"
         :assessment="correctionDetails[index]"
         :button-keys="buttonKeys[index]"
         @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
-        @start-syllable-correction="startCorrectingSyllable($event, questionOrder[index], question)"
+        @start-syllable-correction="startCorrectingSyllable($event, questionOrder[index], question, index)"
       />
       <DetailCorrectionPage
         v-if="isCorrectingSyllable"
         :question="currentCorrectingQuestion"
         :question-order="currentCorrectingQuestionOrder"
+        :old-correction-value="oldSyllableCorrectionValue"
         :which-syllable="currentCorrectingSyllable"
         @update-syllable-correction="endCorrectingSyllable($event)"
+        @close-without-save="closeDetailCorrectionWithoutSaving"
       />
     </table>
   </div>

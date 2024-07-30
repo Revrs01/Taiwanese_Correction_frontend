@@ -1,6 +1,6 @@
 <script>
 export default {
-  emits: ['update-syllable-correction'],
+  emits: ['update-syllable-correction', 'close-without-save'],
   props: {
     question: {
       type: String
@@ -16,6 +16,27 @@ export default {
     },
     audioSentenceCreation: {
       type: String
+    },
+    oldCorrectionValue: {
+      type: String
+    }
+  },
+  mounted() {
+    if (this.oldCorrectionValue === undefined) {
+      console.log('oldValue is undefined')
+      return null
+    } else if (/^-?\d+(\.\d+)?$/.test(this.oldCorrectionValue)) {
+      this.currentPickedButton = this.oldCorrectionValue
+      console.log('old value is 1~15')
+    } else {
+      console.log('old value is sentence')
+      this.currentPickedButton = '16'
+      this.openUserInputField = true
+      this.$nextTick(() => {
+        if (this.$refs.inputField) {
+          this.$refs.inputField.value = this.oldCorrectionValue
+        }
+      })
     }
   },
   data() {
@@ -54,17 +75,29 @@ export default {
       let emitObject = {
         questionOrder: this.questionOrder,
         whichSyllable: this.whichSyllable,
-        isSentence: false,
         returnValue: null
       }
       if (this.currentPickedButton === '16') {
-        emitObject['isSentence'] = true
         emitObject['returnValue'] = this.$refs.inputField.value
       } else {
         emitObject['returnValue'] = this.currentPickedButton
       }
 
       this.$emit('update-syllable-correction', emitObject)
+    },
+    closeDetailCorrectionWithoutSaving() {
+      this.$emit('close-without-save')
+    }
+  },
+  computed: {
+    getButtonClass() {
+      return (buttonIndex) => {
+        if (this.currentPickedButton === null) {
+          return null
+        } else if (buttonIndex === this.currentPickedButton) {
+          return 'btn-primary'
+        }
+      }
     }
   }
 }
@@ -73,6 +106,7 @@ export default {
 <template>
   <div class="modal" style="display: block" ref="modalBody">
     <div class="modal-content">
+      <button class="close" @click="closeDetailCorrectionWithoutSaving">&times;</button>
       <div class="group-title">{{ question }} 第{{ whichSyllable }}音節</div>
       <div class="audio-group">
         <div class="audio-title">唸詞</div>
@@ -90,6 +124,7 @@ export default {
           v-for="index in 16"
           :key="index"
           class="btn correction-btn"
+          :class="getButtonClass(index.toString())"
           @click="buttonClickHandler(index.toString())"
         >{{ buttonList[index.toString()] }}
         </button>
@@ -183,9 +218,12 @@ export default {
 /* The Close Button */
 .close {
   color: #aaaaaa;
+  background-color: inherit;
   float: right;
-  font-size: 28px;
+  font-size: 40px;
+  margin-top: -10px;
   font-weight: bold;
+  border: none;
 }
 
 .close:hover,
@@ -193,5 +231,10 @@ export default {
   color: #000;
   text-decoration: none;
   cursor: pointer;
+}
+
+.btn-primary {
+  color: white;
+  background-color: #0d6efd;
 }
 </style>
