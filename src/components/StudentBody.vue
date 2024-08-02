@@ -21,6 +21,7 @@ export default {
     },
     progress: {
       type: Number,
+      default: 0,
       required: false
     }
   },

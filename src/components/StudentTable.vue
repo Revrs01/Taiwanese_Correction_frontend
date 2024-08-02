@@ -25,7 +25,8 @@ export default {
       isCorrecting: false,
       studentCorrectionProgress: [],
       studentCorrectionProgressBak: [],
-      studentInformationTemp: []
+      studentInformationTemp: [],
+      currentCorrectingIndex: null
     }
   },
   mounted() {
@@ -61,14 +62,20 @@ export default {
     keepOnlySelectedStudent(index) {
       this.studentCorrectionProgressBak = this.studentCorrectionProgress
       this.studentCorrectionProgress = [this.studentCorrectionProgressBak[index]]
+      this.currentCorrectingIndex = index
       this.$emit('keep-only-one-student', index)
       this.isCorrecting = true
     },
-    revertFilteredStudent(index) {
-      this.studentCorrectionProgressBak[index] = this.studentCorrectionProgress[0]
-      this.studentCorrectionProgress = this.studentCorrectionProgressBak
+    revertFilteredStudent() {
+      this.studentCorrectionProgressBak[this.currentCorrectingIndex] = this.studentCorrectionProgress[0]
+      this.studentCorrectionProgress = [...this.studentCorrectionProgressBak]
+      this.currentCorrectingIndex = null
       this.$emit('revert-student-information')
       this.isCorrecting = false
+    },
+    updateCurrentProgress(newProgress) {
+      this.studentCorrectionProgress[0] = newProgress
+      // console.log(newProgress)
     }
   }
 }
@@ -95,6 +102,7 @@ export default {
         :gender="convertGender(information['gender'])"
         :correction-status="defineStatus(studentCorrectionProgress[index])"
         :progress="studentCorrectionProgress[index]"
+        :list-index="index"
         @keep-only-me="keepOnlySelectedStudent(index)"
         @back-to-student-info="revertFilteredStudent"
       />
@@ -105,6 +113,7 @@ export default {
       v-if="isCorrecting"
       :student-information="studentInformation[0]"
       :correction-ref="correctionRef"
+      @update-progress="updateCurrentProgress"
     />
   </div>
 </template>

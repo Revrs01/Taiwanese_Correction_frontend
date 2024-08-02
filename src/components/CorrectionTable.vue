@@ -1,12 +1,12 @@
 <script>
 
-import { defineComponent } from 'vue'
 import CorrectionBody from '@/components/CorrectionBody.vue'
 import DetailCorrectionPage from '@/components/DetailCorrectionPage.vue'
 import axios from 'axios'
 import { store } from '@/components/store.js'
 
-export default defineComponent({
+export default {
+  emits: ['update-progress'],
   props: {
     studentInformation: {
       type: Object,
@@ -51,10 +51,7 @@ export default defineComponent({
         .then(response => {
           this.questionOrder = response.data['_order']
           this.questionList = response.data['questionList']
-          // console.log(this.questionOrder)
           this.buttonKeys = response.data['buttonKeys']
-          // this.correctionData = response.data
-          // this.getCorrectionDetails()
         })
     },
     async getCorrectionDetails() {
@@ -63,7 +60,6 @@ export default defineComponent({
         studentLevel: this.studentLevel,
         correctionRef: this.correctionRef
       }
-      // console.log(studentInfo)
 
       await axios.post(store.apiBaseURL + '/get_correction_details', studentInfo)
         .then(response => {
@@ -78,7 +74,6 @@ export default defineComponent({
             // this won't cause any error I think ...
             this.correctionDetails.push(temp[i])
           }
-          // console.log(this.correctionDetails)
         })
     },
     async updateAssessmentValue(updatedValue, questionIndex, index, syllable = null) {
@@ -105,11 +100,34 @@ export default defineComponent({
         })
           .then(response => {
             this.correctionDetails[index] = response.data[questionIndex]
+            this.calcCurrentProgress()
             console.log('Sync with DB')
           })
       } catch (e) {
         alert(e)
       }
+    },
+    calcCurrentProgress() {
+      let currentProgress
+      let cnt = 0
+      if (this.correctionRef === '2023_02') {
+        for (let x of this.correctionDetails) {
+          if (x) {
+            cnt += 1
+          }
+        }
+        currentProgress = Math.floor(cnt * 100 / this.correctionDetails.length)
+      } else if (this.correctionRef === '2024_07') {
+        // console.log('progress for 2024_07 is not available yet !')
+        for (let x of this.correctionDetails) {
+          cnt += Object.keys(x).length
+        }
+        currentProgress = Math.floor(cnt * 100 / this.buttonKeys.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0))
+      }
+
+      this.$emit('update-progress', currentProgress)
     },
     startCorrectingSyllable(emitObject, questionOrder, question, index) {
       this.oldSyllableCorrectionValue = emitObject['oldValue']
@@ -133,7 +151,7 @@ export default defineComponent({
       this.currentCorrectingQuestionIndex = null
     }
   }
-})
+}
 </script>
 
 <template>
