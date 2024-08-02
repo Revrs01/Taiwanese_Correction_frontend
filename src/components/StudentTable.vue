@@ -102,7 +102,6 @@ export default {
         :gender="convertGender(information['gender'])"
         :correction-status="defineStatus(studentCorrectionProgress[index])"
         :progress="studentCorrectionProgress[index]"
-        :list-index="index"
         @keep-only-me="keepOnlySelectedStudent(index)"
         @back-to-student-info="revertFilteredStudent"
       />
