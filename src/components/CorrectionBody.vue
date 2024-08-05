@@ -88,7 +88,7 @@ export default {
     <!--        <th scope="row" class="th-block">6年5班 20號</th>-->
     <th scope="row" class="th-block">
       <audio controls style="display: block; margin: 0 auto;">
-        <source src='data:audio/wav;base64,${audioString}' type="audio/wav">
+        <source src='data:audio/wav;base64,{{ audio }}' type="audio/wav">
       </audio>
     </th>
     <!--  if buttonKeys is Array, it's 1st correction  -->

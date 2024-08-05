@@ -24,6 +24,8 @@ export default {
       studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high',
       questionOrder: [],
       questionList: [],
+      audioList: [],
+      audioListCreation: [],
       correctionDetails: [],
       currentStudentKey: '',
       buttonKeys: [],
@@ -34,6 +36,8 @@ export default {
       currentCorrectingQuestion: null,
       currentCorrectingQuestionOrder: null,
       currentCorrectingQuestionIndex: null,
+      currentCorrectingAudioPronoun: null,
+      currentCorrectingAudioCreation: null,
       oldSyllableCorrectionValue: null
     }
   },
@@ -41,8 +45,37 @@ export default {
     // this.isMounted = true
     await this.getCorrectionData()
     await this.getCorrectionDetails()
+    await this.getRecordData()
+    if (this.correctionRef === "2024_07") {
+      await this.getCreationRecordData()
+    }
   },
   methods: {
+    async getRecordData() {
+      for (let qN of this.questionOrder) {
+        await axios.post(store.apiBaseURL + '/get_record_file', {
+          'grade_studentClass_seatNumber_studentName': `${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}`,
+          'schoolName': this.studentInformation["schoolName"],
+          'questionNumber': qN
+        })
+          .then((response) => {
+            this.audioList.push(response.data["base64String"])
+          })
+      }
+    },
+    async getCreationRecordData() {
+      // only used in 2nd correction
+      for (let qN of this.questionOrder) {
+        await axios.post(store.apiBaseURL + '/get_record_file', {
+          'grade_studentClass_seatNumber_studentName': `${this.studentInformation['grade']}_${this.studentInformation['studentClass']}_${this.studentInformation['seatNumber']}_${this.studentInformation['studentName']}`,
+          'schoolName': this.studentInformation["schoolName"],
+          'questionNumber': qN.slice(0, -1) + 'c'
+        })
+          .then((response) => {
+            this.audioListCreation.push(response.data["base64String"])
+          })
+      }
+    },
     async getCorrectionData() {
       await axios.post(store.apiBaseURL + '/fetch_test_question', {
         studentLevel: this.studentInformation['grade'] <= 2 ? 'low' : 'high',
@@ -118,7 +151,6 @@ export default {
         }
         currentProgress = Math.floor(cnt * 100 / this.correctionDetails.length)
       } else if (this.correctionRef === '2024_07') {
-        // console.log('progress for 2024_07 is not available yet !')
         for (let x of this.correctionDetails) {
           cnt += Object.keys(x).length
         }
@@ -136,19 +168,25 @@ export default {
       this.currentCorrectingSyllable = emitObject['syllable']
       this.currentCorrectingQuestionIndex = index
       this.isCorrectingSyllable = true
+      this.currentCorrectingAudioPronoun = this.audioList[index]
+      this.currentCorrectingAudioCreation = this.audioListCreation[index]
+    },
+    resetTempCacheForDetailCorrection(){
+      this.isCorrectingSyllable = false
+      this.currentCorrectingQuestion = null
+      this.currentCorrectingSyllable = null
+      this.currentCorrectingQuestionIndex = null
+      this.oldSyllableCorrectionValue = null
+      this.currentCorrectingQuestionOrder = null
+      this.currentCorrectingAudioPronoun = null
+      this.currentCorrectingAudioCreation = null
     },
     endCorrectingSyllable(emitObject) {
       this.updateAssessmentValue(emitObject['returnValue'], emitObject['questionOrder'], this.currentCorrectingQuestionIndex, emitObject['whichSyllable'])
-      this.isCorrectingSyllable = false
-      this.currentCorrectingQuestion = null
-      this.currentCorrectingSyllable = null
-      this.currentCorrectingQuestionIndex = null
+      this.resetTempCacheForDetailCorrection()
     },
     closeDetailCorrectionWithoutSaving() {
-      this.isCorrectingSyllable = false
-      this.currentCorrectingQuestion = null
-      this.currentCorrectingSyllable = null
-      this.currentCorrectingQuestionIndex = null
+      this.resetTempCacheForDetailCorrection()
     }
   }
 }
@@ -171,6 +209,7 @@ export default {
         :question-order="questionOrder[index]"
         :assessment="correctionDetails[index]"
         :button-keys="buttonKeys[index]"
+        :audio="audioList[index]"
         @assessment-value-update="updateAssessmentValue($event, questionOrder[index], index)"
         @start-syllable-correction="startCorrectingSyllable($event, questionOrder[index], question, index)"
       />
@@ -180,6 +219,8 @@ export default {
         :question-order="currentCorrectingQuestionOrder"
         :old-correction-value="oldSyllableCorrectionValue"
         :which-syllable="currentCorrectingSyllable"
+        :audio-pronunciation="currentCorrectingAudioPronoun"
+        :audio-sentence-creation="currentCorrectingAudioCreation"
         @update-syllable-correction="endCorrectingSyllable($event)"
         @close-without-save="closeDetailCorrectionWithoutSaving"
       />
