@@ -1,16 +1,21 @@
 <script>
 export default {
-
+  methods: {
+    getVersionInfo(){
+      alert("現在版本為: v2.0-beta1")
+    },
+    triggerDownload(){
+      alert('下載功能尚未開放，請先使用校正功能')
+    }
+  }
 
 }
 </script>
 
 <template>
   <div class="sidenav" ref="sideNav">
-    <a href="#">About</a>
-    <a href="#">Services</a>
-    <a href="#">Clients</a>
-    <a href="#">Contact</a>
+    <a href="#" @click="getVersionInfo">版本資訊</a>
+    <a href="#" @click="triggerDownload">表單輸出</a>
   </div>
 </template>
 
@@ -41,6 +46,7 @@ export default {
 
 .sidenav a:hover {
   color: #f1f1f1;
+  background-color: darkgray;
 }
 
 </style>

@@ -33,7 +33,14 @@ export default {
   },
   computed: {
     sideNavClass() {
-      return this.isSideNavOpened ? 'open-navbar' : ''
+      return this.isSideNavOpened && (this.navBarIcon === 'list') ? 'open-navbar' : ''
+    }
+  },
+  watch: {
+    navBarIcon(newVal) {
+      if (newVal === "arrow") {
+        this.isSideNavOpened = false
+      }
     }
   }
 

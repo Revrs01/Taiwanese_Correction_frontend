@@ -1,5 +1,5 @@
 import {reactive} from 'vue'
 
 export const store = reactive({
-  apiBaseURL: "http://localhost:31109",
+  apiBaseURL: "http://localhost:9083",
 })
