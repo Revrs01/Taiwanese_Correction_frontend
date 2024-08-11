@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "31109:80"
+    volumes:
+      - .:/app
+    restart: always
