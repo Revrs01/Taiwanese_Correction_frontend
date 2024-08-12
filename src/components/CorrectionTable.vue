@@ -6,7 +6,7 @@ import axios from 'axios'
 import { store } from '@/components/store.js'
 
 export default {
-  emits: ['update-progress'],
+  emits: ['update-progress', 'update-number-of-questions'],
   props: {
     studentInformation: {
       type: Object,
@@ -107,6 +107,14 @@ export default {
             // this won't cause any error I think ...
             this.correctionDetails.push(temp[i])
           }
+
+          // calculate number of questions that needs 2nd correction, and update parent component
+          let cnt = 0
+          this.correctionDetails.forEach((x) => {
+            if (x !== undefined)
+              cnt += 1
+          })
+          this.$emit('update-number-of-questions', cnt)
         })
     },
     async updateAssessmentValue(updatedValue, questionIndex, index, syllable = null) {
@@ -151,12 +159,14 @@ export default {
         }
         currentProgress = Math.floor(cnt * 100 / this.correctionDetails.length)
       } else if (this.correctionRef === '2024_07') {
-        for (let x of this.correctionDetails) {
-          cnt += Object.keys(x).length
-        }
-        currentProgress = Math.floor(cnt * 100 / this.buttonKeys.reduce((accumulator, currentValue) => {
-          return accumulator + currentValue
-        }, 0))
+        let totalCnt = 0
+        this.correctionDetails.forEach((x, index) => {
+          if (x !== undefined) {
+            cnt += Object.keys(x).length
+            totalCnt += this.buttonKeys[index]
+          }
+        })
+        currentProgress = totalCnt > 0 ? Math.floor((cnt * 100) / totalCnt) : 0;
       }
 
       this.$emit('update-progress', currentProgress)

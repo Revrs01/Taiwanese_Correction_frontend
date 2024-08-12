@@ -31,7 +31,7 @@ export default {
       return null
     } else if (/^-?\d+(\.\d+)?$/.test(this.oldCorrectionValue)) {
       this.currentPickedButton = this.oldCorrectionValue
-      console.log('old value is 1~15')
+      console.log('old value is 1~20, 22')
     } else {
       console.log('old value is sentence')
       this.currentPickedButton = '21'
@@ -113,7 +113,13 @@ export default {
         returnValue: null
       }
       if (this.currentPickedButton === '21') {
-        emitObject['returnValue'] = this.$refs.inputField.value
+        const inputFieldValue = this.$refs.inputField.value
+        // console.log(intInputFieldValue)
+        if (/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(inputFieldValue)) {
+          alert("請不要在輸入框只輸入數字")
+          return
+        }
+        emitObject['returnValue'] = inputFieldValue
       } else {
         emitObject['returnValue'] = this.currentPickedButton
       }

@@ -23,6 +23,8 @@ export default {
   data() {
     return {
       isCorrecting: false,
+      numberOfQuestions: [],
+      numberOfQuestionsBak: [],
       studentCorrectionProgress: [],
       studentCorrectionProgressBak: [],
       studentInformationTemp: [],
@@ -38,11 +40,13 @@ export default {
         return gender === '1' ? '男' : '女'
       }
     },
-    defineStatus() {
-      return (progress) => {
-        return progress === 100 ? '已完成' : progress === 0 ? '未校正' : '校正中'
-      }
-    }
+    // defineStatus() {
+    //   return (progress) => {
+    //     if (progress === undefined)
+    //       return '檢查中'
+    //     return progress === 100 ? '已完成' : progress === 0 ? '未校正' : '校正中'
+    //   }
+    // }
   },
   methods: {
     async getStudentProgress() {
@@ -54,7 +58,8 @@ export default {
         })
           .then(response => {
             this.studentCorrectionProgress.push(response.data['progress'])
-
+            this.numberOfQuestions.push(response.data['numberOfQuestions'])
+            console.log(response.data['numberOfQuestions'])
           })
       }
 
@@ -62,6 +67,9 @@ export default {
     keepOnlySelectedStudent(index) {
       this.studentCorrectionProgressBak = this.studentCorrectionProgress
       this.studentCorrectionProgress = [this.studentCorrectionProgressBak[index]]
+      this.numberOfQuestionsBak = this.numberOfQuestions
+      this.numberOfQuestions = [this.numberOfQuestions[index]]
+
       this.currentCorrectingIndex = index
       this.$emit('keep-only-one-student', index)
       this.isCorrecting = true
@@ -69,6 +77,9 @@ export default {
     revertFilteredStudent() {
       this.studentCorrectionProgressBak[this.currentCorrectingIndex] = this.studentCorrectionProgress[0]
       this.studentCorrectionProgress = [...this.studentCorrectionProgressBak]
+      this.numberOfQuestionsBak[this.currentCorrectingIndex] = this.numberOfQuestions[0]
+      this.numberOfQuestions = [...this.numberOfQuestionsBak]
+
       this.currentCorrectingIndex = null
       this.$emit('revert-student-information')
       this.isCorrecting = false
@@ -76,6 +87,9 @@ export default {
     updateCurrentProgress(newProgress) {
       this.studentCorrectionProgress[0] = newProgress
       // console.log(newProgress)
+    },
+    updateNumberOfQuestions(newNumberOfQuestions) {
+      this.numberOfQuestions[0] = newNumberOfQuestions
     }
   }
 }
@@ -89,7 +103,7 @@ export default {
         <th scope="col" style="font-size: 18px;">學生姓名</th>
         <th scope="col" style="font-size: 18px;">年級班級座號</th>
         <th scope="col" style="font-size: 18px;">性別</th>
-        <th scope="col" style="font-size: 18px;">狀態</th>
+        <th scope="col" style="font-size: 18px;">總題數</th>
         <th scope="col" style="font-size: 18px;">完成度</th>
         <th scope="col" style="font-size: 18px;">校正按鈕</th>
       </tr>
@@ -100,7 +114,7 @@ export default {
         :student-name="`${information['studentName']}`"
         :class-info="`${information['grade']}年 ${information['studentClass']}班 ${information['seatNumber']}號`"
         :gender="convertGender(information['gender'])"
-        :correction-status="defineStatus(studentCorrectionProgress[index])"
+        :number-of-questions="numberOfQuestions[index]"
         :progress="studentCorrectionProgress[index]"
         @keep-only-me="keepOnlySelectedStudent(index)"
         @back-to-student-info="revertFilteredStudent"
@@ -113,6 +127,7 @@ export default {
       :student-information="studentInformation[0]"
       :correction-ref="correctionRef"
       @update-progress="updateCurrentProgress"
+      @update-number-of-questions="updateNumberOfQuestions"
     />
   </div>
 </template>

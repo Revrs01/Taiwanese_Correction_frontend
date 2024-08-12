@@ -44,7 +44,7 @@ export default {
       return (syllableNumber) => {
         // if assessment is undefined means this student doesn't need to second check this question
         if (this.assessment === undefined) {
-          return null
+          return 'btn-invisible'
         } else if (`${this.questionOrder}_${syllableNumber}` in this.assessment) {
           return 'btn-active'
         } else {
