@@ -47,6 +47,8 @@ export default {
       activeCorrectionButton: null,
       openUserInputField: false,
       currentPickedButton: null,
+      isPronounAudioMounted: false,
+      isCreationAudioMounted: false,
       buttonList: {
         '1': '1 入聲消失',
         '2': '2 入聲念成 p',
@@ -82,7 +84,7 @@ export default {
       })
         .then(response => {
           if (response.status === 702) {
-            alert("questionNumber or syllable doesn't exist !")
+            alert('questionNumber or syllable doesn\'t exist !')
             alert(`questionNumber=${this.questionOrder}, whichSyllable=${this.whichSyllable}`)
             return
           }
@@ -99,11 +101,11 @@ export default {
     saveChangedCorrection() {
       if (this.currentPickedButton === this.oldCorrectionValue) {
         this.closeDetailCorrectionWithoutSaving()
-        console.log("button doesn't changed, close without saving")
+        console.log('button doesn\'t changed, close without saving')
         return
       } else if (this.$refs.inputField && this.$refs.inputField.value === this.oldCorrectionValue) {
         this.closeDetailCorrectionWithoutSaving()
-        console.log("button & text doesn't changed, close without saving")
+        console.log('button & text doesn\'t changed, close without saving')
         return
       }
 
@@ -116,7 +118,7 @@ export default {
         const inputFieldValue = this.$refs.inputField.value
         // console.log(intInputFieldValue)
         if (/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(inputFieldValue)) {
-          alert("請不要在輸入框只輸入數字")
+          alert('請不要在輸入框只輸入數字')
           return
         }
         emitObject['returnValue'] = inputFieldValue
@@ -157,11 +159,11 @@ export default {
       <div class="audio-group">
         <div class="audio-title">唸詞</div>
         <audio controls style="display: block; margin: 0 auto 10px; width: 100%;">
-          <source src='data:audio/wav;base64,{{ audioPronunciation }}' type="audio/wav">
+          <source :src="`data:audio/wav;base64,${audioPronunciation}`" type="audio/wav">
         </audio>
         <div class="audio-title">造句</div>
         <audio controls style="display: block; margin: 0 auto auto; width: 100%;">
-          <source src='data:audio/wav;base64,{{ audioSentenceCreation }}' type="audio/wav">
+          <source :src='`data:audio/wav;base64,${audioSentenceCreation}`' type="audio/wav">
         </audio>
       </div>
       <div class="group-title" style="margin-top: 30px">快速校正按鈕</div>

@@ -59,7 +59,6 @@ export default {
           .then(response => {
             this.studentCorrectionProgress.push(response.data['progress'])
             this.numberOfQuestions.push(response.data['numberOfQuestions'])
-            console.log(response.data['numberOfQuestions'])
           })
       }
 
@@ -112,7 +111,7 @@ export default {
         v-for="(information, index) in this.studentInformation"
         :key="information"
         :student-name="`${information['studentName']}`"
-        :class-info="`${information['grade']}年 ${information['studentClass']}班 ${information['seatNumber']}號`"
+        :class-info="`${information['grade']}年${information['studentClass']}班 ${information['seatNumber']}號`"
         :gender="convertGender(information['gender'])"
         :number-of-questions="numberOfQuestions[index]"
         :progress="studentCorrectionProgress[index]"
