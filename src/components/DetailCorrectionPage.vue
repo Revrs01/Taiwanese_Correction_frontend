@@ -1,6 +1,7 @@
 <script>
 import axios from 'axios'
 import { store } from '@/components/store.js'
+import { nextTick } from 'vue'
 
 export default {
   emits: ['update-syllable-correction', 'close-without-save'],
@@ -21,7 +22,7 @@ export default {
       type: String
     },
     oldCorrectionValue: {
-      type: String
+      type: [Array, String, undefined]
     }
   },
   async mounted() {
@@ -29,24 +30,20 @@ export default {
     if (this.oldCorrectionValue === undefined) {
       console.log('oldValue is undefined')
       return null
-    } else if (/^-?\d+(\.\d+)?$/.test(this.oldCorrectionValue)) {
-      this.currentPickedButton = this.oldCorrectionValue
-      console.log('old value is 1~20, 22')
-    } else {
-      console.log('old value is sentence')
-      this.currentPickedButton = '21'
+    } else if (typeof this.oldCorrectionValue === "string") {
+      this.currentPickedButtons = "21"
       this.openUserInputField = true
-      await this.$nextTick()
-      if (this.$refs.inputField) {
-        this.$refs.inputField.value = this.oldCorrectionValue
-      }
+      await nextTick()
+      this.$refs.inputField.value = this.oldCorrectionValue
+    } else {
+      this.currentPickedButtons = new Set(this.oldCorrectionValue)
     }
   },
   data() {
     return {
       activeCorrectionButton: null,
       openUserInputField: false,
-      currentPickedButton: null,
+      currentPickedButtons: new Set(),
       isPronounAudioMounted: false,
       isCreationAudioMounted: false,
       buttonList: {
@@ -92,21 +89,38 @@ export default {
         })
     },
     buttonClickHandler(buttonIndex) {
-      // check whether input field should be opened
-      this.openUserInputField = buttonIndex === '21'
+      if (buttonIndex === '21') {
+        // if I click button "21"
+        if (this.currentPickedButtons !== "21") {
+          // if I don't activate "21", button "21" needs to be the only pick
+          this.currentPickedButtons = '21'
+          this.openUserInputField = true
+        } else {
+          // if "21" is activated, remove everything I picked then deactivate "21"
+          this.openUserInputField = false
+          this.currentPickedButtons = new Set()
+        }
+        return
+      } else if (this.currentPickedButtons === "21") {
+        // if other buttons are clicked, clear everything then close input field
+        this.currentPickedButtons = new Set()
+        this.openUserInputField = false
+      }
 
-      // update current pick
-      this.currentPickedButton = buttonIndex
+      if (this.currentPickedButtons.has(buttonIndex)) {
+        this.currentPickedButtons.delete(buttonIndex)
+      } else {
+        this.currentPickedButtons.add(buttonIndex)
+      }
     },
     saveChangedCorrection() {
-      if (this.currentPickedButton === this.oldCorrectionValue) {
+      if (this.currentPickedButtons === new Set(this.oldCorrectionValue)) {
         this.closeDetailCorrectionWithoutSaving()
         console.log('button doesn\'t changed, close without saving')
         return
-      } else if (this.$refs.inputField && this.$refs.inputField.value === this.oldCorrectionValue) {
+      } else if (this.currentPickedButtons === this.oldCorrectionValue) {
         this.closeDetailCorrectionWithoutSaving()
-        console.log('button & text doesn\'t changed, close without saving')
-        return
+        console.log('text doesn\'t changed, close without saving')
       }
 
       let emitObject = {
@@ -114,18 +128,21 @@ export default {
         whichSyllable: this.whichSyllable,
         returnValue: null
       }
-      if (this.currentPickedButton === '21') {
+
+      if (typeof this.currentPickedButtons === "string") {
         const inputFieldValue = this.$refs.inputField.value
         // console.log(intInputFieldValue)
         if (/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(inputFieldValue)) {
           alert('請不要在輸入框只輸入數字')
           return
+        } else {
+          emitObject['returnValue'] = inputFieldValue
+          this.$emit('update-syllable-correction', emitObject)
+          return
         }
-        emitObject['returnValue'] = inputFieldValue
-      } else {
-        emitObject['returnValue'] = this.currentPickedButton
       }
 
+      emitObject['returnValue'] = Array.from(this.currentPickedButtons)
       this.$emit('update-syllable-correction', emitObject)
     },
     closeDetailCorrectionWithoutSaving() {
@@ -135,11 +152,20 @@ export default {
   computed: {
     getButtonClass() {
       return (buttonIndex) => {
-        if (this.currentPickedButton === null) {
+        if (this.currentPickedButtons === null) {
           return null
-        } else if (buttonIndex === this.currentPickedButton) {
-          return 'btn-primary'
         }
+
+        if (typeof this.currentPickedButtons === "string") {
+          if (buttonIndex === "21")
+            return 'btn-primary'
+        } else {
+          if (this.currentPickedButtons.has(buttonIndex)) {
+            return 'btn-primary'
+          }
+        }
+
+
       }
     },
     isButtonDisabled() {
