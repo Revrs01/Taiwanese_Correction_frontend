@@ -1,6 +1,7 @@
 # Taiwanese_Correction_frontend
 
 ## Project Setup
+#### Place this into Taibun server at `C:\Program Files\Taiwanese_Correction\Taiwanese_Correction_v2`
 
 ```sh
 npm install
