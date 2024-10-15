@@ -1,29 +1,7 @@
 # Taiwanese_Correction_frontend
 
 ## Project Setup
-#### Place this into Taibun server at `C:\Program Files\Taiwanese_Correction\Taiwanese_Correction_v2`
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+#### Place clone this repo into Taibun server `140.116.153.134` at `C:\Program Files\Taiwanese_Correction\Taiwanese_Correction_v2`
 
 ### RUN project using Docker
 ```sh
@@ -37,7 +15,7 @@ docker compose down
 
 ### Web Structure
 
-```js
+```
 <HomePage>
   <NavigationBar>
     <OffCanvasNavBar/>
