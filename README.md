@@ -1,7 +1,7 @@
 # Taiwanese_Correction_frontend
 
 ## Project Setup
-#### Place clone this repo into Taibun server `140.116.153.134` at `C:\Program Files\Taiwanese_Correction\Taiwanese_Correction_v2`
+#### Please clone this repo into Taibun server `140.116.153.134` at `C:\Program Files\Taiwanese_Correction\Taiwanese_Correction_v2`
 
 ### RUN project using Docker
 ```sh
