@@ -21,7 +21,9 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      isAudioMounted: false,
+    }
   },
   computed: {
     getButtonClass() {
@@ -44,7 +46,7 @@ export default {
       return (syllableNumber) => {
         // if assessment is undefined means this student doesn't need to second check this question
         if (this.assessment === undefined) {
-          return null
+          return 'btn-invisible'
         } else if (`${this.questionOrder}_${syllableNumber}` in this.assessment) {
           return 'btn-active'
         } else {
@@ -77,6 +79,11 @@ export default {
         oldValue: this.assessment[`${this.questionOrder}_${whichSyllable}`]
       })
     }
+  },
+  watch: {
+    audio() {
+      this.isAudioMounted = true
+    }
   }
 }
 </script>
@@ -87,8 +94,8 @@ export default {
     <th scope="row" class="th-block">{{ question }}</th>
     <!--        <th scope="row" class="th-block">6年5班 20號</th>-->
     <th scope="row" class="th-block">
-      <audio controls style="display: block; margin: 0 auto;">
-        <source src='data:audio/wav;base64,{{ audio }}' type="audio/wav">
+      <audio controls style="display: block; margin: 0 auto;" v-if="isAudioMounted">
+        <source :src="`data:audio/wav;base64,${this.audio}`" type="audio/wav">
       </audio>
     </th>
     <!--  if buttonKeys is Array, it's 1st correction  -->

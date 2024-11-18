@@ -15,8 +15,9 @@ export default {
       type: String,
       required: true
     },
-    correctionStatus: {
-      type: String,
+    numberOfQuestions: {
+      type: Number,
+      default: 0,
       required: true
     },
     progress: {
@@ -50,7 +51,7 @@ export default {
     <th scope="row" class="th-block">{{ studentName }}</th>
     <th scope="row" class="th-block">{{ classInfo }}</th>
     <th scope="row" class="th-block">{{ gender }}</th>
-    <th class="th-block">{{ correctionStatus }}</th>
+    <th class="th-block">{{ numberOfQuestions }}</th>
     <td class="th-block" style="max-width: 100px;">
       <div class="d-flex align-items-center justify-contents-center">
         <div>

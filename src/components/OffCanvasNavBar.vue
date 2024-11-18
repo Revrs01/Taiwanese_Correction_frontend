@@ -2,7 +2,7 @@
 export default {
   methods: {
     getVersionInfo(){
-      alert("現在版本為: v2.0-beta1")
+      alert("現在版本為: v2.0-beta2")
     },
     triggerDownload(){
       alert('下載功能尚未開放，請先使用校正功能')

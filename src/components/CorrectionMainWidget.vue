@@ -6,7 +6,7 @@ import { store } from '@/components/store.js'
 import axios from 'axios'
 
 export default {
-  emits: ["change-icon"],
+  emits: ['change-icon'],
   props: {
     shouldStopCorrection: {
       type: Boolean,
@@ -32,10 +32,17 @@ export default {
       try {
         this.correctionRef = options.options.correctionRef
         await axios.post(store.apiBaseURL + '/filter_by_options', options)
-        .then((response) => {
-          this.studentInformation = response.data
-          this.correctionStart()
-        })
+          .then((response) => {
+            this.studentInformation = response.data
+            this.studentInformation.sort((a, b) => {
+              return (
+                parseInt(a['grade']) - parseInt(b['grade']) ||   // First compare by grade
+                parseInt(a['studentClass']) - parseInt(b['studentClass']) ||   // If grades are equal, compare by class
+                parseInt(a['seatNumber']) - parseInt(b['seatNumber']) // If both grades and classes are equal, compare by seatNumber
+              )
+            })
+            this.correctionStart()
+          })
       } catch (e) {
         alert(e)
       }
@@ -63,7 +70,7 @@ export default {
   watch: {
     shouldStopCorrection(newVal) {
       if (newVal) {
-        this.correctionStop();
+        this.correctionStop()
       }
     }
   }
@@ -72,7 +79,7 @@ export default {
 
 <template>
   <FilterWindow @filter-student="getStudentInformation"
-    v-if="isFilterWindowVisible"
+                v-if="isFilterWindowVisible"
   />
   <StudentTable
     v-if="isStudentTableVisible"

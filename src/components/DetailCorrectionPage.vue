@@ -1,4 +1,7 @@
 <script>
+import axios from 'axios'
+import { store } from '@/components/store.js'
+
 export default {
   emits: ['update-syllable-correction', 'close-without-save'],
   props: {
@@ -21,28 +24,31 @@ export default {
       type: String
     }
   },
-  mounted() {
+  async mounted() {
+    await this.getDetailCorrectionButton()
     if (this.oldCorrectionValue === undefined) {
       console.log('oldValue is undefined')
       return null
     } else if (/^-?\d+(\.\d+)?$/.test(this.oldCorrectionValue)) {
       this.currentPickedButton = this.oldCorrectionValue
-      console.log('old value is 1~15')
+      console.log('old value is 1~20, 22')
     } else {
       console.log('old value is sentence')
-      this.currentPickedButton = '16'
+      this.currentPickedButton = '21'
       this.openUserInputField = true
-      this.$nextTick(() => {
-        if (this.$refs.inputField) {
-          this.$refs.inputField.value = this.oldCorrectionValue
-        }
-      })
+      await this.$nextTick()
+      if (this.$refs.inputField) {
+        this.$refs.inputField.value = this.oldCorrectionValue
+      }
     }
   },
   data() {
     return {
+      activeCorrectionButton: null,
       openUserInputField: false,
       currentPickedButton: null,
+      isPronounAudioMounted: false,
+      isCreationAudioMounted: false,
       buttonList: {
         '1': '1 入聲消失',
         '2': '2 入聲念成 p',
@@ -51,34 +57,71 @@ export default {
         '5': '5 入聲念成 h',
         '6': '6 鼻音 ing 念成 in',
         '7': '7 鼻音 nn 不見',
-        '8': '8 沒有鼻音念成有鼻音 nn',
-        '9': '9 濁音 g 不見',
-        '10': '10 濁音g唸成 k',
-        '11': '11 濁音 b 不見',
-        '12': '12 濁音 b 念成 m',
-        '13': '13 濁音 l 念成 n',
-        '14': '14 念成華語',
-        '15': '15 念成台語的其他詞彙',
-        '16': '16 其他錯誤'
+        '8': '8 鼻音 nn 唸成 n',
+        '9': '9 鼻音 m 唸成 n',
+        '10': '10 濁音 g 不見',
+        '11': '11 濁音g唸成k',
+        '12': '12 濁音b不見',
+        '13': '13 濁音b念成m (m念成b)',
+        '14': '14 濁音l念成n',
+        '15': '15 受華語影響（聲母）',
+        '16': '16 受華語影響（韻母）',
+        '17': '17 受華語影響（聲母+韻母）',
+        '18': '18 受華語影響（聲調）',
+        '19': '19 華語讀音',
+        '20': '20 念成台語的其他詞彙',
+        '21': '21 其他錯誤（手動輸入）',
+        '22': '22 音節正確'
       }
     }
   },
   methods: {
+    async getDetailCorrectionButton() {
+      await axios.post(store.apiBaseURL + '/get_detail_correction_button', {
+        correctionRef: '2024_07',
+        questionNumber: this.questionOrder,
+        whichSyllable: this.whichSyllable
+      })
+        .then(response => {
+          if (response.status === 702) {
+            alert('questionNumber or syllable doesn\'t exist !')
+            alert(`questionNumber=${this.questionOrder}, whichSyllable=${this.whichSyllable}`)
+            return
+          }
+          this.activeCorrectionButton = response.data
+        })
+    },
     buttonClickHandler(buttonIndex) {
       // check whether input field should be opened
-      this.openUserInputField = buttonIndex === '16'
+      this.openUserInputField = buttonIndex === '21'
 
       // update current pick
       this.currentPickedButton = buttonIndex
     },
     saveChangedCorrection() {
+      if (this.currentPickedButton === this.oldCorrectionValue) {
+        this.closeDetailCorrectionWithoutSaving()
+        console.log('button doesn\'t changed, close without saving')
+        return
+      } else if (this.$refs.inputField && this.$refs.inputField.value === this.oldCorrectionValue) {
+        this.closeDetailCorrectionWithoutSaving()
+        console.log('button & text doesn\'t changed, close without saving')
+        return
+      }
+
       let emitObject = {
         questionOrder: this.questionOrder,
         whichSyllable: this.whichSyllable,
         returnValue: null
       }
-      if (this.currentPickedButton === '16') {
-        emitObject['returnValue'] = this.$refs.inputField.value
+      if (this.currentPickedButton === '21') {
+        const inputFieldValue = this.$refs.inputField.value
+        // console.log(intInputFieldValue)
+        if (/^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(inputFieldValue)) {
+          alert('請不要在輸入框只輸入數字')
+          return
+        }
+        emitObject['returnValue'] = inputFieldValue
       } else {
         emitObject['returnValue'] = this.currentPickedButton
       }
@@ -98,6 +141,11 @@ export default {
           return 'btn-primary'
         }
       }
+    },
+    isButtonDisabled() {
+      return (buttonIndex) => {
+        return !this.activeCorrectionButton || !this.activeCorrectionButton.includes(buttonIndex)
+      }
     }
   }
 }
@@ -111,20 +159,21 @@ export default {
       <div class="audio-group">
         <div class="audio-title">唸詞</div>
         <audio controls style="display: block; margin: 0 auto 10px; width: 100%;">
-          <source src='data:audio/wav;base64,{{ audioPronunciation }}' type="audio/wav">
+          <source :src="`data:audio/wav;base64,${audioPronunciation}`" type="audio/wav">
         </audio>
         <div class="audio-title">造句</div>
         <audio controls style="display: block; margin: 0 auto auto; width: 100%;">
-          <source src='data:audio/wav;base64,{{ audioSentenceCreation }}' type="audio/wav">
+          <source :src='`data:audio/wav;base64,${audioSentenceCreation}`' type="audio/wav">
         </audio>
       </div>
       <div class="group-title" style="margin-top: 30px">快速校正按鈕</div>
       <div class="button-group">
         <button
-          v-for="index in 16"
+          v-for="index in Object.keys(buttonList).length"
           :key="index"
           class="btn correction-btn"
           :class="getButtonClass(index.toString())"
+          :disabled="isButtonDisabled(index.toString())"
           @click="buttonClickHandler(index.toString())"
         >{{ buttonList[index.toString()] }}
         </button>
